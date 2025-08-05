@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "allMids"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '18'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: '{"BTC": "43250.5", "ETH": "2680.25", "SOL": "98.75", "ARB": "1.22965", "ATOM": "11.2585", "AVAX": "18.3695", "DOGE": "0.08234", "LTC": "72.45", "MATIC": "0.8456", "DOT": "6.789", "ADA": "0.4567", "LINK": "14.567", "UNI": "6.234", "AAVE": "89.123", "SUSHI": "1.234"}'
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '234'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1

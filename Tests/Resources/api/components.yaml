@@ -1,0 +1,304 @@
+components:
+  schemas:
+    FloatString:
+      type: string
+      pattern: "^\\d+\\.?\\d*$"
+      description: "Decimal number as string for precision"
+      example: "123.456"
+    
+    Address:
+      type: string
+      pattern: "^0x[a-fA-F0-9]{40}$"
+      description: "Ethereum address format"
+      example: "0x1234567890123456789012345678901234567890"
+    
+    PrivateKey:
+      type: string
+      pattern: "^(0x)?[a-fA-F0-9]{64}$"
+      description: "Private key in hex format"
+      example: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    
+    OrderID:
+      type: integer
+      minimum: 0
+      description: "Unique order identifier"
+      example: 12345
+    
+    ClientOrderID:
+      type: string
+      maxLength: 128
+      description: "Client-provided order identifier"
+      example: "client_order_123"
+    
+    AssetSymbol:
+      type: string
+      pattern: "^[A-Z0-9-]{1,20}$"
+      description: "Trading asset symbol"
+      example: "BTC"
+    
+    Side:
+      type: string
+      enum: ["B", "A"]
+      description: "Order side - B for Buy, A for Ask/Sell"
+    
+    OrderType:
+      type: string
+      enum: ["limit", "market", "stop", "stopLimit"]
+      description: "Type of order"
+    
+    TimeInForce:
+      type: string
+      enum: ["Gtc", "Ioc", "Alo"]
+      description: "Time in force - Gtc (Good Till Cancel), Ioc (Immediate or Cancel), Alo (Add Liquidity Only)"
+    
+    Position:
+      type: object
+      properties:
+        coin:
+          $ref: "#/components/schemas/AssetSymbol"
+        entryPx:
+          $ref: "#/components/schemas/FloatString"
+        leverage:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: ["cross", "isolated"]
+            value:
+              type: integer
+              minimum: 1
+        liquidationPx:
+          oneOf:
+            - $ref: "#/components/schemas/FloatString"
+            - type: "null"
+        marginUsed:
+          $ref: "#/components/schemas/FloatString"
+        maxLeverage:
+          type: integer
+          minimum: 1
+        positionValue:
+          $ref: "#/components/schemas/FloatString"
+        returnOnEquity:
+          $ref: "#/components/schemas/FloatString"
+        szi:
+          $ref: "#/components/schemas/FloatString"
+        unrealizedPnl:
+          $ref: "#/components/schemas/FloatString"
+      required:
+        - coin
+        - entryPx
+        - leverage
+        - marginUsed
+        - maxLeverage
+        - positionValue
+        - returnOnEquity
+        - szi
+        - unrealizedPnl
+    
+    AssetPosition:
+      type: object
+      properties:
+        position:
+          $ref: "#/components/schemas/Position"
+        type:
+          type: string
+          enum: ["oneWay"]
+      required:
+        - position
+        - type
+    
+    CrossMarginSummary:
+      type: object
+      properties:
+        accountValue:
+          $ref: "#/components/schemas/FloatString"
+        totalMarginUsed:
+          $ref: "#/components/schemas/FloatString"
+        totalNtlPos:
+          $ref: "#/components/schemas/FloatString"
+        totalRawUsd:
+          $ref: "#/components/schemas/FloatString"
+      required:
+        - accountValue
+        - totalMarginUsed
+        - totalNtlPos
+        - totalRawUsd
+    
+    UserState:
+      type: object
+      properties:
+        assetPositions:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetPosition"
+        crossMarginSummary:
+          $ref: "#/components/schemas/CrossMarginSummary"
+        crossMaintenanceMarginUsed:
+          type: number
+          format: double
+        time:
+          type: integer
+          format: int64
+      required:
+        - assetPositions
+        - crossMarginSummary
+        - crossMaintenanceMarginUsed
+        - time
+    
+    OpenOrder:
+      type: object
+      properties:
+        coin:
+          $ref: "#/components/schemas/AssetSymbol"
+        limitPx:
+          $ref: "#/components/schemas/FloatString"
+        oid:
+          $ref: "#/components/schemas/OrderID"
+        side:
+          $ref: "#/components/schemas/Side"
+        sz:
+          $ref: "#/components/schemas/FloatString"
+        timestamp:
+          type: integer
+          format: int64
+        tif:
+          $ref: "#/components/schemas/TimeInForce"
+        triggerCondition:
+          type: string
+          nullable: true
+        triggerPx:
+          oneOf:
+            - $ref: "#/components/schemas/FloatString"
+            - type: "null"
+        children:
+          type: array
+          items:
+            type: object
+        isPositionTpsl:
+          type: boolean
+        isTrigger:
+          type: boolean
+        orderType:
+          $ref: "#/components/schemas/OrderType"
+        origSz:
+          $ref: "#/components/schemas/FloatString"
+        reduceOnly:
+          type: boolean
+        cloid:
+          oneOf:
+            - $ref: "#/components/schemas/ClientOrderID"
+            - type: "null"
+      required:
+        - coin
+        - limitPx
+        - oid
+        - side
+        - sz
+        - timestamp
+        - tif
+        - children
+        - isPositionTpsl
+        - isTrigger
+        - orderType
+        - origSz
+        - reduceOnly
+    
+    Fill:
+      type: object
+      properties:
+        coin:
+          $ref: "#/components/schemas/AssetSymbol"
+        px:
+          $ref: "#/components/schemas/FloatString"
+        sz:
+          $ref: "#/components/schemas/FloatString"
+        side:
+          $ref: "#/components/schemas/Side"
+        time:
+          type: integer
+          format: int64
+        startPosition:
+          $ref: "#/components/schemas/FloatString"
+        dir:
+          type: string
+        closedPnl:
+          $ref: "#/components/schemas/FloatString"
+        hash:
+          type: string
+        oid:
+          $ref: "#/components/schemas/OrderID"
+        crossed:
+          type: boolean
+        fee:
+          $ref: "#/components/schemas/FloatString"
+        liquidation:
+          type: boolean
+        tid:
+          type: integer
+      required:
+        - coin
+        - px
+        - sz
+        - side
+        - time
+        - startPosition
+        - dir
+        - closedPnl
+        - hash
+        - oid
+        - crossed
+        - fee
+        - liquidation
+        - tid
+    
+    Asset:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/AssetSymbol"
+        szDecimals:
+          type: integer
+          minimum: 0
+          maximum: 18
+        maxLeverage:
+          type: integer
+          minimum: 1
+        onlyIsolated:
+          type: boolean
+      required:
+        - name
+        - szDecimals
+        - maxLeverage
+        - onlyIsolated
+    
+    Meta:
+      type: object
+      properties:
+        universe:
+          type: array
+          items:
+            $ref: "#/components/schemas/Asset"
+      required:
+        - universe
+    
+    ReferralState:
+      type: object
+      properties:
+        state:
+          type: string
+        code:
+          type: string
+          nullable: true
+      required:
+        - state
+    
+    SubAccount:
+      type: object
+      properties:
+        subAccountUser:
+          $ref: "#/components/schemas/Address"
+        clearinghouseState:
+          $ref: "#/components/schemas/UserState"
+      required:
+        - subAccountUser
+        - clearinghouseState

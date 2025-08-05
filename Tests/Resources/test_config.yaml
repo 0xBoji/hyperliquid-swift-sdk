@@ -1,0 +1,172 @@
+# Test Configuration for Hyperliquid Swift SDK
+# This file defines test settings and mock data
+
+test_settings:
+  # Test environment settings
+  environment: testnet
+  timeout: 30.0
+  retry_count: 3
+  
+  # Mock data settings
+  use_cassettes: true
+  record_new_cassettes: false
+  cassette_directory: "Tests/Resources/cassettes"
+  
+  # API specification settings
+  validate_against_specs: true
+  spec_directory: "Tests/Resources/api"
+
+# Test data constants
+test_data:
+  # Test addresses (these are fake addresses for testing)
+  addresses:
+    valid_address: "0x1234567890123456789012345678901234567890"
+    invalid_address: "invalid_address"
+    zero_address: "0x0000000000000000000000000000000000000000"
+  
+  # Test private keys (these are fake keys for testing)
+  private_keys:
+    valid_key: "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
+    invalid_key: "invalid_key"
+    short_key: "0x123"
+    zero_key: "0x0000000000000000000000000000000000000000000000000000000000000000"
+  
+  # Test order data
+  orders:
+    valid_order_id: 12345
+    invalid_order_id: -1
+    valid_client_order_id: "client_order_123"
+    invalid_client_order_id: ""
+  
+  # Test asset symbols
+  assets:
+    valid_symbols: ["BTC", "ETH", "SOL", "ARB", "ATOM"]
+    invalid_symbols: ["", "TOOLONG_SYMBOL_NAME", "invalid@symbol"]
+  
+  # Test order sizes
+  order_sizes:
+    valid_sizes: [0.1, 1.0, 100.0, 1000.0]
+    invalid_sizes: [0.0, -1.0, 0.00001, 10000000.0]
+  
+  # Test time ranges
+  time_ranges:
+    one_hour_ago: 3600000  # 1 hour in milliseconds
+    one_day_ago: 86400000  # 24 hours in milliseconds
+    one_week_ago: 604800000  # 7 days in milliseconds
+
+# Expected API responses (for validation)
+expected_responses:
+  all_mids:
+    min_markets: 5
+    max_markets: 100
+    required_fields: ["BTC", "ETH"]
+    price_range:
+      min: 0.0001
+      max: 1000000.0
+  
+  user_state:
+    required_fields: ["assetPositions", "crossMarginSummary", "crossMaintenanceMarginUsed", "time"]
+    asset_position_fields: ["position", "type"]
+    position_fields: ["coin", "entryPx", "leverage", "marginUsed", "maxLeverage", "positionValue", "returnOnEquity", "szi", "unrealizedPnl"]
+    margin_summary_fields: ["accountValue", "totalMarginUsed", "totalNtlPos", "totalRawUsd"]
+  
+  open_orders:
+    required_fields: ["coin", "limitPx", "oid", "side", "sz", "timestamp", "tif", "children", "isPositionTpsl", "isTrigger", "orderType", "origSz", "reduceOnly"]
+    optional_fields: ["triggerCondition", "triggerPx", "cloid"]
+  
+  fills:
+    required_fields: ["coin", "px", "sz", "side", "time", "startPosition", "dir", "closedPnl", "hash", "oid", "crossed", "fee", "liquidation", "tid"]
+
+# Error test cases
+error_test_cases:
+  network_errors:
+    - status_code: 400
+      message: "Bad Request"
+      expected_error: "requestFailed"
+    - status_code: 401
+      message: "Unauthorized"
+      expected_error: "authenticationRequired"
+    - status_code: 500
+      message: "Internal Server Error"
+      expected_error: "requestFailed"
+    - status_code: 503
+      message: "Service Unavailable"
+      expected_error: "networkError"
+  
+  validation_errors:
+    - input: "invalid_private_key"
+      expected_error: "invalidPrivateKey"
+    - input: "invalid_address"
+      expected_error: "invalidAddress"
+    - input: 0.0
+      field: "order_size"
+      expected_error: "invalidOrderSize"
+
+# Performance benchmarks
+performance_benchmarks:
+  api_calls:
+    get_all_mids:
+      max_duration_ms: 1000
+      max_memory_mb: 10
+    get_user_state:
+      max_duration_ms: 1500
+      max_memory_mb: 15
+    get_user_fills:
+      max_duration_ms: 2000
+      max_memory_mb: 20
+  
+  data_processing:
+    json_parsing:
+      max_duration_ms: 100
+      max_memory_mb: 5
+    model_creation:
+      max_duration_ms: 50
+      max_memory_mb: 3
+
+# Test coverage requirements
+coverage_requirements:
+  minimum_line_coverage: 80.0
+  minimum_branch_coverage: 70.0
+  critical_paths:
+    - "client_creation"
+    - "api_calls"
+    - "error_handling"
+    - "data_validation"
+    - "model_decoding"
+
+# Integration test settings
+integration_tests:
+  enabled: true
+  environment: testnet
+  rate_limit:
+    requests_per_second: 10
+    burst_limit: 50
+  
+  # Real API endpoints to test (using testnet)
+  endpoints_to_test:
+    - name: "getAllMids"
+      critical: true
+      timeout: 5.0
+    - name: "getMeta"
+      critical: true
+      timeout: 5.0
+    - name: "getUserState"
+      critical: false
+      timeout: 10.0
+      requires_auth: true
+
+# Documentation tests
+documentation_tests:
+  validate_examples: true
+  check_code_snippets: true
+  verify_api_docs: true
+  
+  example_files:
+    - "Examples/BasicUsage.swift"
+    - "Examples/README.md"
+  
+  required_documentation:
+    - "README.md"
+    - "API_REFERENCE.md"
+    - "EXAMPLES.md"
+    - "CHANGELOG.md"

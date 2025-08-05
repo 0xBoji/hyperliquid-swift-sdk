@@ -1,0 +1,225 @@
+import XCTest
+@testable import HyperliquidSwift
+
+/// Integration tests for Hyperliquid Swift SDK
+/// These tests make actual API calls to the Hyperliquid testnet
+final class IntegrationTests: XCTestCase {
+    
+    // MARK: - Test Properties
+    
+    var readOnlyClient: HyperliquidClient!
+    
+    // MARK: - Setup & Teardown
+    
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        
+        // Use testnet for integration tests
+        readOnlyClient = try HyperliquidClient.readOnly(environment: .testnet)
+        
+        // Skip integration tests if running in CI or without network
+        try XCTSkipIf(ProcessInfo.processInfo.environment["SKIP_INTEGRATION_TESTS"] == "true", 
+                      "Integration tests skipped")
+    }
+    
+    override func tearDownWithError() throws {
+        readOnlyClient = nil
+        try super.tearDownWithError()
+    }
+    
+    // MARK: - Read-Only API Tests
+    
+    func testGetAllMids() async throws {
+        // Test getting all market mid prices
+        let mids = try await readOnlyClient.getAllMids()
+        
+        XCTAssertFalse(mids.isEmpty, "Should have at least some market data")
+        
+        // Verify data structure
+        for (symbol, price) in mids.prefix(3) {
+            XCTAssertFalse(symbol.isEmpty, "Symbol should not be empty")
+            XCTAssertGreaterThan(price, 0, "Price should be positive")
+            
+            print("📈 \(symbol): $\(price)")
+        }
+    }
+    
+    func testGetMeta() async throws {
+        // Test getting exchange metadata
+        let meta = try await readOnlyClient.getMeta()
+        
+        XCTAssertFalse(meta.universe.isEmpty, "Should have at least some assets")
+        
+        // Verify asset data structure
+        for asset in meta.universe.prefix(3) {
+            XCTAssertFalse(asset.name.isEmpty, "Asset name should not be empty")
+            XCTAssertGreaterThanOrEqual(asset.szDecimals, 0, "Size decimals should be non-negative")
+            
+            print("🪙 \(asset.name): \(asset.szDecimals) decimals")
+        }
+    }
+    
+    func testGetSpotMeta() async throws {
+        // Test getting spot metadata
+        let spotMeta = try await readOnlyClient.getSpotMeta()
+        
+        XCTAssertFalse(spotMeta.universe.isEmpty, "Should have at least some spot assets")
+        
+        // Verify spot asset data
+        for asset in spotMeta.universe.prefix(3) {
+            XCTAssertFalse(asset.name.isEmpty, "Spot asset name should not be empty")
+            XCTAssertGreaterThanOrEqual(asset.szDecimals, 0, "Size decimals should be non-negative")
+            
+            print("💰 Spot \(asset.name): \(asset.szDecimals) decimals")
+        }
+    }
+    
+    func testGetSpotMetaRaw() async throws {
+        // Test getting raw spot metadata
+        let spotMetaRaw = try await readOnlyClient.getSpotMetaRaw()
+        
+        XCTAssertFalse(spotMetaRaw.isEmpty, "Raw spot metadata should not be empty")
+        
+        print("📊 Raw spot metadata keys: \(Array(spotMetaRaw.keys).prefix(5))")
+    }
+    
+    // MARK: - User-Specific API Tests (with test address)
+    
+    func testUserStateWithTestAddress() async throws {
+        // Use a known test address (this might not have data, but should not error)
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        let userState = try await readOnlyClient.getUserState(address: testAddress)
+        
+        // Should not throw error, even if user has no positions
+        XCTAssertNotNil(userState)
+        print("👤 Test user has \(userState.assetPositions.count) positions")
+    }
+    
+    func testOpenOrdersWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        let openOrders = try await readOnlyClient.getOpenOrders(address: testAddress)
+        
+        // Should not throw error, even if user has no orders
+        XCTAssertNotNil(openOrders)
+        print("📋 Test user has \(openOrders.count) open orders")
+    }
+    
+    func testUserFillsWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        let fills = try await readOnlyClient.getUserFills(address: testAddress)
+        
+        // Should not throw error, even if user has no fills
+        XCTAssertNotNil(fills)
+        print("📊 Test user has \(fills.count) fills")
+    }
+    
+    func testUserFillsByTimeWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        // Test last 24 hours
+        let oneDayAgo = Int(Date().timeIntervalSince1970 * 1000) - (24 * 60 * 60 * 1000)
+        let now = Int(Date().timeIntervalSince1970 * 1000)
+        
+        let fills = try await readOnlyClient.getUserFillsByTime(
+            user: testAddress, 
+            startTime: oneDayAgo, 
+            endTime: now
+        )
+        
+        XCTAssertNotNil(fills)
+        print("📊 Test user has \(fills.count) fills in last 24 hours")
+    }
+    
+    func testSpotUserStateWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        let spotState = try await readOnlyClient.getSpotUserState(user: testAddress)
+        
+        XCTAssertNotNil(spotState)
+        print("💰 Test user spot state has \(spotState.keys.count) fields")
+    }
+    
+    func testFrontendOpenOrdersWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        let frontendOrders = try await readOnlyClient.getFrontendOpenOrders(user: testAddress)
+        
+        XCTAssertNotNil(frontendOrders)
+        print("🖥️ Test user frontend orders has \(frontendOrders.keys.count) fields")
+    }
+    
+    func testUserFeesWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+        
+        let userFees = try await readOnlyClient.getUserFees(user: testAddress)
+        
+        XCTAssertNotNil(userFees)
+        print("💳 Test user fees has \(userFees.keys.count) fields")
+    }
+    
+    // MARK: - Error Handling Tests
+    
+    func testInvalidAddressHandling() async throws {
+        // Test with invalid address format
+        let invalidAddress = "invalid_address"
+        
+        do {
+            _ = try await readOnlyClient.getUserState(address: invalidAddress)
+            XCTFail("Should have thrown an error for invalid address")
+        } catch {
+            // Expected to throw an error
+            print("✅ Correctly handled invalid address: \(error)")
+        }
+    }
+    
+    func testNetworkErrorHandling() async throws {
+        // Test with invalid endpoint (should cause network error)
+        // This is a bit tricky to test without mocking, so we'll skip for now
+        // In a real test suite, you'd use URLProtocol mocking
+        
+        print("ℹ️ Network error handling test skipped (requires mocking)")
+    }
+    
+    // MARK: - Performance Tests
+    
+    func testPerformanceGetAllMids() throws {
+        // Test performance of getting all mids
+        measure {
+            let expectation = XCTestExpectation(description: "Get all mids")
+            
+            Task {
+                do {
+                    _ = try await readOnlyClient.getAllMids()
+                    expectation.fulfill()
+                } catch {
+                    XCTFail("Performance test failed: \(error)")
+                    expectation.fulfill()
+                }
+            }
+            
+            wait(for: [expectation], timeout: 10.0)
+        }
+    }
+    
+    func testPerformanceGetMeta() throws {
+        // Test performance of getting metadata
+        measure {
+            let expectation = XCTestExpectation(description: "Get meta")
+            
+            Task {
+                do {
+                    _ = try await readOnlyClient.getMeta()
+                    expectation.fulfill()
+                } catch {
+                    XCTFail("Performance test failed: \(error)")
+                    expectation.fulfill()
+                }
+            }
+            
+            wait(for: [expectation], timeout: 10.0)
+        }
+    }
+}

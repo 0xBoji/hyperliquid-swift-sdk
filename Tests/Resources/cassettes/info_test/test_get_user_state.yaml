@@ -1,0 +1,83 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "clearinghouseState", "user": "0x1234567890123456789012345678901234567890"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '85'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: |
+        {
+          "assetPositions": [
+            {
+              "position": {
+                "coin": "BTC",
+                "entryPx": "43200.0",
+                "leverage": {
+                  "type": "cross",
+                  "value": 2
+                },
+                "liquidationPx": null,
+                "marginUsed": "2160.0",
+                "maxLeverage": 100,
+                "positionValue": "4320.0",
+                "returnOnEquity": "0.0116",
+                "szi": "0.1",
+                "unrealizedPnl": "5.0"
+              },
+              "type": "oneWay"
+            },
+            {
+              "position": {
+                "coin": "ETH",
+                "entryPx": "2675.0",
+                "leverage": {
+                  "type": "cross",
+                  "value": 3
+                },
+                "liquidationPx": null,
+                "marginUsed": "892.5",
+                "maxLeverage": 50,
+                "positionValue": "2677.5",
+                "returnOnEquity": "0.0028",
+                "szi": "1.0",
+                "unrealizedPnl": "2.5"
+              },
+              "type": "oneWay"
+            }
+          ],
+          "crossMarginSummary": {
+            "accountValue": "10075.0",
+            "totalMarginUsed": "3052.5",
+            "totalNtlPos": "6997.5",
+            "totalRawUsd": "10075.0"
+          },
+          "crossMaintenanceMarginUsed": 152.625,
+          "time": 1722855000000
+        }
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '1024'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1
