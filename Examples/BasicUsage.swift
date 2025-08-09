@@ -148,7 +148,7 @@ struct BasicUsageExample {
 
             // Validate time range fills
             for fill in recentFills.prefix(3) {
-                let fillTimeMs = Int(fill.time.timeIntervalSince1970 * 1000)
+                let fillTimeMs = Int(fill.time) // fill.time is already Int64 timestamp in ms
                 assert(fillTimeMs >= oneDayAgo, "Fill time should be within range")
                 assert(fillTimeMs <= now, "Fill time should not be in future")
             }
