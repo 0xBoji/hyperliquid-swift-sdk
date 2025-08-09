@@ -17,6 +17,35 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
 - **🌐 Multi-Environment**: Testnet and Mainnet support
 - **🛡️ Enterprise Grade**: Production-ready cryptography and error handling
 
+
+## ✅ Implemented Feature Checklist
+
+- Trading
+  - [x] Limit/Market orders, Modify, Cancel, Schedule cancel
+  - [x] Bulk orders and Batch modify orders
+- Market Data & Queries
+  - [x] All mids, L2 order book, Candle snapshot
+  - [x] Meta, MetaAndAssetCtxs, SpotMeta, SpotMetaAndAssetCtxs
+  - [x] User/Spot state, Open/Frontend open orders, User fills (+by time)
+  - [x] Funding history, User funding history, User fees
+  - [x] Query order by oid/cloid, Referral state
+  - [x] Perp dex list, Multi‑sig signers, Perp deploy auction status
+  - [x] Sub‑accounts query (raw JSON)
+- Account Management
+  - [x] Update leverage, Update isolated margin, Set referrer
+- Sub Accounts
+  - [x] Create sub account
+- Real‑time
+  - [x] WebSocket subscriptions
+
+## 🛣️ Future Features
+
+- [ ] Map `querySubAccounts` → strong models (with nested UserState)
+- [ ] More examples and docs for new APIs
+- [ ] TPSL helpers and risk utilities
+- [ ] CI matrix expansion (macOS versions, optional Linux build-only)
+- [ ] Transfer/withdraw operations kept off by default for mobile safety (opt‑in discussion)
+
 ## 📦 Installation
 
 ### Swift Package Manager
