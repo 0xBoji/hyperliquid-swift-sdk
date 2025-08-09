@@ -85,7 +85,7 @@ public struct Fill: Codable, Sendable {
     public let px: Decimal
     public let sz: Decimal
     public let side: Side
-    public let time: Date
+    public let time: Int64
     public let startPosition: Decimal
     public let dir: String
     public let closedPnl: Decimal
@@ -94,13 +94,14 @@ public struct Fill: Codable, Sendable {
     public let crossed: Bool
     public let fee: Decimal
     public let liquidation: Bool?
+    public let tid: Int
 
     public init(
         coin: String,
         px: Decimal,
         sz: Decimal,
         side: Side,
-        time: Date,
+        time: Int64,
         startPosition: Decimal,
         dir: String,
         closedPnl: Decimal,
@@ -108,7 +109,8 @@ public struct Fill: Codable, Sendable {
         oid: OrderID,
         crossed: Bool,
         fee: Decimal,
-        liquidation: Bool? = nil
+        liquidation: Bool? = nil,
+        tid: Int
     ) {
         self.coin = coin
         self.px = px
@@ -123,6 +125,7 @@ public struct Fill: Codable, Sendable {
         self.crossed = crossed
         self.fee = fee
         self.liquidation = liquidation
+        self.tid = tid
     }
 }
 

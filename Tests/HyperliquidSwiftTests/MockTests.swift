@@ -134,15 +134,16 @@ final class MockTests: XCTestCase {
             "tid": 67890
         }
         """.data(using: .utf8)!
-        
+
         let fill = try JSONDecoder().decode(Fill.self, from: json)
         
         XCTAssertEqual(fill.coin, "BTC")
-        XCTAssertEqual(fill.px, "50000.0")
-        XCTAssertEqual(fill.sz, "1.0")
-        XCTAssertEqual(fill.side, "B")
+        XCTAssertEqual(fill.px, Decimal(string: "50000.0"))
+        XCTAssertEqual(fill.sz, Decimal(string: "1.0"))
+        XCTAssertEqual(fill.side, Side.buy)
         XCTAssertEqual(fill.oid, 12345)
-        XCTAssertEqual(fill.fee, "25.0")
+        XCTAssertEqual(fill.fee, Decimal(string: "25.0"))
+        XCTAssertEqual(fill.tid, 67890)
     }
     
     func testReferralStateDecoding() throws {
