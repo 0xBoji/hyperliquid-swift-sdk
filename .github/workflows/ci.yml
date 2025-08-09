@@ -13,10 +13,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Xcode
+      - name: Set up Xcode (Swift 6.0 toolchain)
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: latest-stable
+          xcode-version: '15.4'
 
       - name: Build (library and examples)
         run: |
