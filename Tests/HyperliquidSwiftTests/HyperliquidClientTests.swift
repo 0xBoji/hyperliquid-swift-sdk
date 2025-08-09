@@ -3,16 +3,18 @@ import XCTest
 
 final class HyperliquidClientTests: XCTestCase {
     
-    func testReadOnlyClientCreation() throws {
+    func testReadOnlyClientCreation() async throws {
         let client = try HyperliquidClient.readOnly(environment: .testnet)
-        XCTAssertFalse(client.isAuthenticated)
+        let isAuth = await client.isAuthenticated
+        XCTAssertFalse(isAuth)
         XCTAssertNil(client.walletAddress)
     }
     
-    func testTradingClientCreation() throws {
+    func testTradingClientCreation() async throws {
         let privateKeyHex = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         let client = try HyperliquidClient.trading(privateKeyHex: privateKeyHex, environment: .testnet)
-        XCTAssertTrue(client.isAuthenticated)
+        let isAuth = await client.isAuthenticated
+        XCTAssertTrue(isAuth)
         XCTAssertNotNil(client.walletAddress)
     }
     

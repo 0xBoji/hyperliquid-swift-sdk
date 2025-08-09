@@ -183,8 +183,8 @@ final class AdvancedTradingTests: XCTestCase {
 
     func testQueryUserToMultiSigSigners() async throws {
         do {
-            // Try using configured example address if available
-            let address = TestConfig.accountAddress
+            // Use example address for testing
+            let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
             _ = try await client.queryUserToMultiSigSigners(user: address)
             XCTAssertTrue(true)
         } catch { XCTAssertTrue(true) }
