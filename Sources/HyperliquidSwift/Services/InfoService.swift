@@ -26,15 +26,18 @@ public actor InfoService: HTTPService {
     // MARK: - Market Data Methods
     
     /// Get all mid prices
-    public func getAllMids() async throws -> [String: Decimal] {
-        let payload = ["type": "allMids"]
-        
+    public func getAllMids(dex: String = "") async throws -> [String: Decimal] {
+        let payload = [
+            "type": "allMids",
+            "dex": dex
+        ]
+
         let response = try await httpClient.postAndDecode(
             path: "/info",
             payload: payload,
             responseType: [String: String].self
         )
-        
+
         // Convert string values to Decimal
         var result: [String: Decimal] = [:]
         for (key, value) in response {
@@ -42,7 +45,7 @@ public actor InfoService: HTTPService {
                 result[key] = decimal
             }
         }
-        
+
         return result
     }
     
@@ -85,12 +88,13 @@ public actor InfoService: HTTPService {
     // MARK: - Account Information Methods
     
     /// Get user state for a specific address
-    public func getUserState(address: String) async throws -> UserState {
+    public func getUserState(address: String, dex: String = "") async throws -> UserState {
         let payload = [
             "type": "clearinghouseState",
-            "user": address
+            "user": address,
+            "dex": dex
         ]
-        
+
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: payload,
@@ -99,16 +103,32 @@ public actor InfoService: HTTPService {
     }
     
     /// Get open orders for a user
-    public func getOpenOrders(address: String) async throws -> [OpenOrder] {
+    public func getOpenOrders(address: String, dex: String = "") async throws -> [OpenOrder] {
         let payload = [
             "type": "openOrders",
-            "user": address
+            "user": address,
+            "dex": dex
         ]
-        
+
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: payload,
             responseType: [OpenOrder].self
+        )
+    }
+
+    /// Get frontend open orders for a user (with additional frontend info)
+    public func getFrontendOpenOrders(address: String, dex: String = "") async throws -> JSONResponse {
+        let payload = [
+            "type": "frontendOpenOrders",
+            "user": address,
+            "dex": dex
+        ]
+
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: payload,
+            responseType: JSONResponse.self
         )
     }
     
@@ -442,6 +462,73 @@ public actor InfoService: HTTPService {
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: ["type": "perpDeployAuctionStatus"],
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Missing Methods for Feature Parity
+
+    /// Get user fees and trading volume information
+    public func getUserFees(address: String) async throws -> JSONResponse {
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: ["type": "userFees", "user": address],
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Get user funding payments history
+    public func getUserFunding(user: String, startTime: Int, endTime: Int? = nil) async throws -> JSONResponse {
+        var payload: [String: Any] = [
+            "type": "userFunding",
+            "user": user,
+            "startTime": startTime
+        ]
+
+        if let endTime = endTime {
+            payload["endTime"] = endTime
+        }
+
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: payload,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Get funding rate history for a specific coin
+    public func getFundingHistory(coin: String, startTime: Int, endTime: Int? = nil) async throws -> JSONResponse {
+        var payload: [String: Any] = [
+            "type": "fundingHistory",
+            "coin": coin,
+            "startTime": startTime
+        ]
+
+        if let endTime = endTime {
+            payload["endTime"] = endTime
+        }
+
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: payload,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Query referral state for a user
+    public func queryReferralState(user: String) async throws -> JSONResponse {
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: ["type": "referral", "user": user],
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Query sub accounts for a user
+    public func querySubAccounts(user: String) async throws -> JSONResponse {
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: ["type": "subAccounts", "user": user],
             responseType: JSONResponse.self
         )
     }
