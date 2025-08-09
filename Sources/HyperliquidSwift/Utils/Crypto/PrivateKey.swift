@@ -1,5 +1,5 @@
 import Foundation
-import libsecp256k1
+import secp256k1
 
 /// Private key for cryptographic operations
 public struct PrivateKey: Sendable {

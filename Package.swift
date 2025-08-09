@@ -32,14 +32,14 @@ let package = Package(
 
     ],
     dependencies: [
-        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift", from: "0.15.0"),
+        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift", exact: "0.16.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.8.0"),
     ],
     targets: [
         .target(
             name: "HyperliquidSwift",
             dependencies: [
-                .product(name: "libsecp256k1", package: "secp256k1.swift"),
+                .product(name: "secp256k1", package: "secp256k1.swift"),
                 .product(name: "CryptoSwift", package: "CryptoSwift"),
             ],
             path: "Sources/HyperliquidSwift"

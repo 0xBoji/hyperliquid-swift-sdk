@@ -210,6 +210,12 @@ struct AdvancedTradingExample {
                         oid: 123456789, // placeholder
                         order: BulkOrderRequest(coin: "ETH", isBuy: true, sz: 0.001, px: 1000, orderType: .limit)
                     )
+                ]
+                let resp = try await client.bulkModifyOrders(modifies)
+                print("✅ Batch modify response: \(resp.dictionary)")
+            } catch {
+                print("⚠️ Batch modify error: \(error)")
+            }
 
             // MARK: - Info Parity Utilities
             print("\n🧭 Info Utilities")
@@ -221,7 +227,7 @@ struct AdvancedTradingExample {
             } catch { print("⚠️ getPerpDexs error: \(error)") }
 
             do {
-                let (address, _) = try await ExampleUtils.setup()
+                let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7" // example address
                 let resp = try await client.queryUserToMultiSigSigners(user: address)
                 print("✅ MultiSig signers: \(resp.dictionary)")
             } catch { print("⚠️ queryUserToMultiSigSigners error: \(error)") }
@@ -240,19 +246,11 @@ struct AdvancedTradingExample {
                 print("✅ Create sub account: \(resp.dictionary)")
             } catch { print("⚠️ createSubAccount error: \(error)") }
 
-                ]
-                let resp = try await client.bulkModifyOrders(modifies)
-                print("✅ Batch modify response: \(resp.dictionary)")
-            } catch {
-                print("⚠️ Batch modify error: \(error)")
-            }
-
-
             // MARK: - Market Data Features
             print("\n📊 Market Data Features")
             print("=======================")
 
-            let address = await client.walletAddress ?? "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
+            let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
 
             // Test candles data
             print("\n📈 Testing candles data...")

@@ -413,7 +413,8 @@ public actor InfoService: HTTPService {
             payload: ["type": "userStakingRewards", "user": address],
             responseType: JSONResponse.self
         )
-    
+    }
+
     // MARK: - New Info API Parity Methods
     public func getPerpDexs() async throws -> JSONResponse {
         return try await httpClient.postAndDecode(
@@ -438,7 +439,6 @@ public actor InfoService: HTTPService {
             responseType: JSONResponse.self
         )
     }
-}
 }
 
 // MARK: - Supporting Types

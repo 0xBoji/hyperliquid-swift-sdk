@@ -1,7 +1,7 @@
 import Foundation
 import CryptoKit
 import CryptoSwift
-import libsecp256k1
+import secp256k1
 
 /// Service for cryptographic operations (EIP-712 signing, hashing, etc.)
 public struct CryptoService {
