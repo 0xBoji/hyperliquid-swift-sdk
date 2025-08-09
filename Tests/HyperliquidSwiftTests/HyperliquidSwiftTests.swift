@@ -255,8 +255,8 @@ final class HyperliquidSwiftTests: XCTestCase {
     }
 
     func testGetUserFillsByTime() async throws {
-        let startTime = 1683245555699 
-        let endTime = 1683245884863
+        let startTime: Int64 = 1683245555699
+        let endTime: Int64 = 1683245884863
 
         let response = try await readOnlyClient.getUserFillsByTime(
             user: testAddress,
