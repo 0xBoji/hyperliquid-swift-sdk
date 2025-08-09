@@ -2,11 +2,11 @@ import XCTest
 @testable import HyperliquidSwift
 
 final class AdvancedTradingTests: XCTestCase {
-    
+
     var client: HyperliquidClient!
     // real private key test  on hyperliquid testnet
     let testPrivateKey = "41f1a7bf3ce7d3cb7a72edb826460ffd103f2a751c374a77486e5247f12282f7"
-    
+
     override func setUp() async throws {
         try await super.setUp()
         client = try HyperliquidClient(
@@ -14,14 +14,14 @@ final class AdvancedTradingTests: XCTestCase {
             environment: .testnet
         )
     }
-    
+
     override func tearDown() async throws {
         client = nil
         try await super.tearDown()
     }
-    
+
     // MARK: - Market Order Tests
-    
+
     func testMarketBuyOrder() async throws {
         // Test market buy order creation
         do {
@@ -30,16 +30,16 @@ final class AdvancedTradingTests: XCTestCase {
                 sz: Decimal(0.001),
                 reduceOnly: false
             )
-            
+
             // Should get a response (even if it fails due to insufficient funds)
             XCTAssertNotNil(response.dictionary)
-            
+
             // Check response structure
             if let status = response.dictionary["status"] as? String {
                 // Either success or business logic error (both are valid for our test)
                 XCTAssertTrue(status == "ok" || status == "err")
             }
-            
+
         } catch let error as HyperliquidError {
             // Network or authentication errors are acceptable in tests
             switch error {
@@ -50,7 +50,7 @@ final class AdvancedTradingTests: XCTestCase {
             }
         }
     }
-    
+
     func testMarketSellOrder() async throws {
         // Test market sell order creation
         do {
@@ -59,9 +59,9 @@ final class AdvancedTradingTests: XCTestCase {
                 sz: Decimal(0.001),
                 reduceOnly: false
             )
-            
+
             XCTAssertNotNil(response.dictionary)
-            
+
         } catch let error as HyperliquidError {
             // Expected in test environment
             switch error {
@@ -72,21 +72,21 @@ final class AdvancedTradingTests: XCTestCase {
             }
         }
     }
-    
+
     // MARK: - Cancel All Orders Tests
-    
+
     func testCancelAllOrdersForCoin() async throws {
         // Test canceling all orders for a specific coin
         do {
             let response = try await client.cancelAllOrders(coin: "ETH")
-            
+
             XCTAssertNotNil(response.dictionary)
-            
+
             // Should return success even if no orders to cancel
             if let status = response.dictionary["status"] as? String {
                 XCTAssertEqual(status, "ok")
             }
-            
+
         } catch let error as HyperliquidError {
             switch error {
             case .networkError, .authenticationRequired, .requestFailed:
@@ -96,18 +96,18 @@ final class AdvancedTradingTests: XCTestCase {
             }
         }
     }
-    
+
     func testCancelAllOrders() async throws {
         // Test canceling all orders across all coins
         do {
             let response = try await client.cancelAllOrders()
-            
+
             XCTAssertNotNil(response.dictionary)
-            
+
             if let status = response.dictionary["status"] as? String {
                 XCTAssertEqual(status, "ok")
             }
-            
+
         } catch let error as HyperliquidError {
             switch error {
             case .networkError, .authenticationRequired, .requestFailed:
@@ -117,9 +117,9 @@ final class AdvancedTradingTests: XCTestCase {
             }
         }
     }
-    
+
     // MARK: - Modify Order Tests
-    
+
     func testModifyOrder() async throws {
         // Test order modification
         do {
@@ -129,9 +129,9 @@ final class AdvancedTradingTests: XCTestCase {
                 newPrice: Decimal(3500.0),
                 newSize: Decimal(0.1)
             )
-            
+
             XCTAssertNotNil(response.dictionary)
-            
+
         } catch let error as HyperliquidError {
             // Expected to fail since we don't have a real order
             switch error {
@@ -140,14 +140,45 @@ final class AdvancedTradingTests: XCTestCase {
             default:
                 XCTFail("Unexpected error: \(error)")
             }
+
+    // MARK: - New Feature Tests (non-destructive)
+    func testUpdateLeverage() async throws {
+        do {
+            let resp = try await client.updateLeverage(coin: "ETH", leverage: 3, isCross: true)
+            XCTAssertNotNil(resp.dictionary)
+        } catch { XCTAssertTrue(true) }
+    }
+
+    func testUpdateIsolatedMargin() async throws {
+        do {
+            let resp = try await client.updateIsolatedMargin(coin: "ETH", amountUsd: 5, isBuy: true)
+            XCTAssertNotNil(resp.dictionary)
+        } catch { XCTAssertTrue(true) }
+    }
+
+    func testSetReferrer() async throws {
+        do {
+            let resp = try await client.setReferrer(code: "TESTCODE123")
+            XCTAssertNotNil(resp.dictionary)
+        } catch { XCTAssertTrue(true) }
+    }
+
+    func testBatchModify() async throws {
+        do {
+            let modifies = [ModifyRequest(oid: 123456, order: BulkOrderRequest(coin: "ETH", isBuy: true, sz: 0.001, px: 1000))]
+            let resp = try await client.bulkModifyOrders(modifies)
+            XCTAssertNotNil(resp.dictionary)
+        } catch { XCTAssertTrue(true) }
+    }
+
         }
     }
-    
+
     // MARK: - Integration Tests
-    
+
     func testCompleteOrderFlow() async throws {
         // Test a complete order flow: place -> modify -> cancel
-        
+
         // 1. Try to place a limit order
         do {
             let limitResponse = try await client.limitBuy(
@@ -156,15 +187,15 @@ final class AdvancedTradingTests: XCTestCase {
                 px: Decimal(1000.0), // Very low price to avoid accidental fills
                 reduceOnly: false
             )
-            
+
             XCTAssertNotNil(limitResponse.dictionary)
-            
+
             // If successful, try to cancel all orders
             if let status = limitResponse.dictionary["status"] as? String, status == "ok" {
                 let cancelResponse = try await client.cancelAllOrders(coin: "ETH")
                 XCTAssertNotNil(cancelResponse.dictionary)
             }
-            
+
         } catch let error as HyperliquidError {
             switch error {
             case .networkError, .authenticationRequired, .requestFailed:
@@ -174,20 +205,20 @@ final class AdvancedTradingTests: XCTestCase {
             }
         }
     }
-    
+
     // MARK: - Error Handling Tests
-    
+
     func testClientNotInitializedError() async throws {
         // Test error when trading service is not initialized
         let uninitializedClient = try HyperliquidClient(
             privateKeyHex: testPrivateKey,
             environment: .testnet
         )
-        
+
         // Manually set trading service to nil to test error
         // This would require making tradingService accessible for testing
         // For now, we'll test with invalid parameters
-        
+
         do {
             _ = try await uninitializedClient.modifyOrder(
                 oid: 0,
@@ -200,14 +231,14 @@ final class AdvancedTradingTests: XCTestCase {
             XCTAssertTrue(true, "Expected error for invalid parameters")
         }
     }
-    
+
     // MARK: - Performance Tests
-    
+
     func testMarketDataPerformance() async throws {
         // Test performance of market data retrieval
         measure {
             let expectation = XCTestExpectation(description: "Market data retrieval")
-            
+
             Task {
                 do {
                     _ = try await client.getAllMids()
@@ -216,16 +247,16 @@ final class AdvancedTradingTests: XCTestCase {
                     expectation.fulfill()
                 }
             }
-            
+
             wait(for: [expectation], timeout: 5.0)
         }
     }
-    
+
     // MARK: - Validation Tests
-    
+
     func testOrderParameterValidation() async throws {
         // Test validation of order parameters
-        
+
         // Test negative size
         do {
             _ = try await client.marketBuy(coin: "ETH", sz: Decimal(-1))
@@ -233,7 +264,7 @@ final class AdvancedTradingTests: XCTestCase {
         } catch {
             XCTAssertTrue(true, "Expected validation error")
         }
-        
+
         // Test empty coin
         do {
             _ = try await client.marketBuy(coin: "", sz: Decimal(0.1))

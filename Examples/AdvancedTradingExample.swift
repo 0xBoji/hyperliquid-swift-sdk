@@ -6,7 +6,7 @@ struct AdvancedTradingExample {
     static func main() async {
         print("🚀 Hyperliquid Swift SDK - Advanced Trading Examples")
         print("====================================================")
-        
+
         do {
             // Load configuration (inline to avoid dependency issues)
             let privateKey = "41f1a7bf3ce7d3cb7a72edb826460ffd103f2a751c374a77486e5247f12282f7"
@@ -16,14 +16,14 @@ struct AdvancedTradingExample {
                 privateKeyHex: privateKey,
                 environment: .testnet
             )
-            
+
             print("✅ Client initialized")
             print("📍 Address: \(await client.walletAddress ?? "Unknown")")
-            
+
             // MARK: - Market Orders
             print("\n⚡️ Market Orders")
             print("================")
-            
+
             print("📈 Testing market buy...")
             do {
                 let marketBuyResponse = try await client.marketBuy(
@@ -35,11 +35,11 @@ struct AdvancedTradingExample {
             } catch {
                 print("⚠️ Market buy error (expected for demo account): \(error)")
             }
-            
+
             print("\n📉 Testing market sell...")
             do {
                 let marketSellResponse = try await client.marketSell(
-                    coin: "ETH", 
+                    coin: "ETH",
                     sz: Decimal(0.001),
                     reduceOnly: false
                 )
@@ -47,23 +47,23 @@ struct AdvancedTradingExample {
             } catch {
                 print("⚠️ Market sell error (expected for demo account): \(error)")
             }
-            
+
             // MARK: - Order Management
             print("\n🔧 Order Management")
             print("===================")
-            
+
             // Get current open orders
             print("\n📋 Current open orders...")
             let openOrders = try await client.getOpenOrders()
             print("📊 Open orders count: \(openOrders.count)")
-            
+
             if !openOrders.isEmpty {
                 print("📋 Open orders:")
                 for order in openOrders.prefix(3) {
                     print("   • \(order.coin): \(order.sz) @ \(order.px) (\(order.side))")
                 }
             }
-            
+
             // Cancel all orders for specific coin
             print("\n🗑️ Testing cancel all orders for ETH...")
             do {
@@ -72,7 +72,7 @@ struct AdvancedTradingExample {
             } catch {
                 print("⚠️ Cancel all error: \(error)")
             }
-            
+
             // Modify order example
             print("\n✏️ Testing modify order...")
             if let firstOrder = openOrders.first {
@@ -90,7 +90,7 @@ struct AdvancedTradingExample {
             } else {
                 print("ℹ️ No orders to modify")
             }
-            
+
             // Cancel all orders across all coins
             print("\n🗑️ Testing cancel all orders (all coins)...")
             do {
@@ -99,23 +99,23 @@ struct AdvancedTradingExample {
             } catch {
                 print("⚠️ Cancel all orders error: \(error)")
             }
-            
+
             // MARK: - Risk Management Demo
             print("\n🛡️ Risk Management Examples")
             print("============================")
-            
+
             let userState = try await client.getUserState()
             let accountValue = userState.crossMarginSummary.accountValue
             let marginUsed = userState.crossMarginSummary.totalMarginUsed
-            
+
             print("💰 Account Value: $\(accountValue)")
             print("📊 Margin Used: $\(marginUsed)")
             print("🔒 Available Margin: $\(accountValue - marginUsed)")
-            
+
             // Risk check example
             let riskPercentage = marginUsed / accountValue * 100
             print("⚠️ Risk Level: \(String(format: "%.1f", Double(truncating: riskPercentage as NSNumber)))%")
-            
+
             if riskPercentage > 80 {
                 print("🚨 HIGH RISK: Consider reducing positions")
             } else if riskPercentage > 50 {
@@ -123,27 +123,27 @@ struct AdvancedTradingExample {
             } else {
                 print("✅ LOW RISK: Safe to trade")
             }
-            
+
             // MARK: - Trading Strategy Example
             print("\n📈 Trading Strategy Example")
             print("===========================")
-            
+
             // Get current prices
             let prices = try await client.getAllMids()
             if let ethPrice = prices["ETH"], let btcPrice = prices["BTC"] {
                 print("📊 Current Prices:")
                 print("   ETH: $\(ethPrice)")
                 print("   BTC: $\(btcPrice)")
-                
+
                 // Example: Simple grid trading setup
                 print("\n🎯 Grid Trading Setup Example:")
                 let gridLevels = 5
                 let gridSpacing = Decimal(0.02) // 2%
-                
+
                 for i in 1...gridLevels {
                     let buyPrice = ethPrice * (1 - gridSpacing * Decimal(i))
                     let sellPrice = ethPrice * (1 + gridSpacing * Decimal(i))
-                    
+
                     print("   Level \(i): Buy @ $\(buyPrice), Sell @ $\(sellPrice)")
                 }
             }
@@ -174,6 +174,49 @@ struct AdvancedTradingExample {
             } catch {
                 print("⚠️ Schedule cancel error: \(error)")
             }
+
+            // MARK: - Account Management Features
+            print("\n🧰 Account Management")
+            print("====================")
+
+            // Update leverage
+            do {
+                let resp = try await client.updateLeverage(coin: "ETH", leverage: 5, isCross: true)
+                print("✅ Update leverage response: \(resp.dictionary)")
+            } catch {
+                print("⚠️ Update leverage error: \(error)")
+            }
+
+            // Update isolated margin
+            do {
+                let resp = try await client.updateIsolatedMargin(coin: "ETH", amountUsd: 10, isBuy: true)
+                print("✅ Update isolated margin response: \(resp.dictionary)")
+            } catch {
+                print("⚠️ Update isolated margin error: \(error)")
+            }
+
+            // Set referrer code
+            do {
+                let resp = try await client.setReferrer(code: "TESTCODE123")
+                print("✅ Set referrer response: \(resp.dictionary)")
+            } catch {
+                print("⚠️ Set referrer error: \(error)")
+            }
+
+            // Batch modify example (uses placeholder values)
+            do {
+                let modifies: [ModifyRequest] = [
+                    ModifyRequest(
+                        oid: 123456789, // placeholder
+                        order: BulkOrderRequest(coin: "ETH", isBuy: true, sz: 0.001, px: 1000, orderType: .limit)
+                    )
+                ]
+                let resp = try await client.bulkModifyOrders(modifies)
+                print("✅ Batch modify response: \(resp.dictionary)")
+            } catch {
+                print("⚠️ Batch modify error: \(error)")
+            }
+
 
             // MARK: - Market Data Features
             print("\n📊 Market Data Features")
@@ -321,7 +364,7 @@ struct AdvancedTradingExample {
             print("🎯 CORE TRADING: 100% COMPLETE!")
             print("📊 MARKET DATA: 100% COMPLETE!")
             print("🥩 STAKING: 100% COMPLETE!")
-            
+
         } catch {
             print("❌ Error: \(error)")
         }
