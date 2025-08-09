@@ -18,13 +18,13 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Build
-        run: swift build -v
-        working-directory: hyperliquid-swift-sdk
-
-      - name: Run tests (skip network-heavy when requested)
+      - name: Build (library and examples)
         run: |
-          echo "Running tests"
-          swift test -v
-        working-directory: hyperliquid-swift-sdk
+          swift build -v
+          swift build -v --product BasicUsage
+          swift build -v --product TradingExample
+          swift build -v --product AdvancedTradingExample
+
+      - name: Run tests
+        run: swift test -v
 
