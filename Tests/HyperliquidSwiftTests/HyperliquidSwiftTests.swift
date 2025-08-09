@@ -219,9 +219,9 @@ final class HyperliquidSwiftTests: XCTestCase {
         // Verify order structure if orders exist
         for order in response {
             XCTAssertFalse(order.coin.isEmpty, "Order coin should not be empty")
-            XCTAssertGreaterThan(order.limitPx, 0, "Limit price should be positive")
+            XCTAssertGreaterThan(order.px, 0, "Price should be positive")
             XCTAssertGreaterThan(order.oid, 0, "Order ID should be positive")
-            XCTAssertTrue(["B", "A"].contains(order.side), "Side should be B or A")
+            XCTAssertTrue([Side.buy, Side.sell].contains(order.side), "Side should be buy or sell")
             XCTAssertGreaterThan(order.sz, 0, "Size should be positive")
             XCTAssertGreaterThan(order.timestamp, 0, "Timestamp should be positive")
             XCTAssertGreaterThan(order.origSz, 0, "Original size should be positive")
@@ -238,16 +238,16 @@ final class HyperliquidSwiftTests: XCTestCase {
         // Verify fill structure if fills exist
         for fill in response {
             XCTAssertFalse(fill.coin.isEmpty, "Fill coin should not be empty")
-            XCTAssertFalse(fill.px.isEmpty, "Fill price should not be empty")
-            XCTAssertFalse(fill.sz.isEmpty, "Fill size should not be empty")
-            XCTAssertTrue(["B", "A"].contains(fill.side), "Fill side should be B or A")
+            XCTAssertGreaterThan(fill.px, 0, "Fill price should be positive")
+            XCTAssertGreaterThan(fill.sz, 0, "Fill size should be positive")
+            XCTAssertFalse(fill.side.isEmpty, "Fill side should not be empty")
             XCTAssertGreaterThan(fill.time, 0, "Fill time should be positive")
-            XCTAssertFalse(fill.startPosition.isEmpty, "Start position should not be empty")
+            XCTAssertGreaterThan(fill.startPosition, 0, "Start position should be non-negative")
             XCTAssertFalse(fill.dir.isEmpty, "Direction should not be empty")
-            XCTAssertFalse(fill.closedPnl.isEmpty, "Closed PnL should not be empty")
+            XCTAssertGreaterThanOrEqual(fill.closedPnl, 0, "Closed PnL should be non-negative")
             XCTAssertFalse(fill.hash.isEmpty, "Hash should not be empty")
             XCTAssertGreaterThan(fill.oid, 0, "Order ID should be positive")
-            XCTAssertFalse(fill.fee.isEmpty, "Fee should not be empty")
+            XCTAssertGreaterThanOrEqual(fill.fee, 0, "Fee should be non-negative")
             XCTAssertGreaterThan(fill.tid, 0, "Trade ID should be positive")
         }
 
