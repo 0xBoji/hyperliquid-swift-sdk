@@ -1,5 +1,12 @@
 import Foundation
 
+/// Errors that can occur in TradingService
+public enum TradingServiceError: Error {
+    case invalidTransferType
+    case signingFailed
+    case invalidSignature
+}
+
 /// Service for handling trading operations
 /// Designed to be Sendable and thread-safe for Swift 6 concurrency
 public final class TradingService: Sendable {
@@ -561,6 +568,146 @@ public final class TradingService: Sendable {
             "r": r,
             "s": s,
             "v": v
+        ]
+    }
+
+    // MARK: - Transfer Operations
+
+    /// Transfer USDC between spot and perp wallets
+    /// - Parameters:
+    ///   - amount: Amount to transfer
+    ///   - toPerp: true to transfer from spot to perp, false for perp to spot
+    /// - Returns: Transfer response as JSONResponse
+    public func usdClassTransfer(amount: Decimal, toPerp: Bool) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "usdClassTransfer",
+            "amount": amount.description,
+            "toPerp": toPerp,
+            "nonce": timestamp
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: true)
+    }
+
+    /// Transfer USDC to another address
+    /// - Parameters:
+    ///   - amount: Amount to transfer
+    ///   - destination: Destination address
+    /// - Returns: Transfer response as JSONResponse
+    public func usdTransfer(amount: Decimal, destination: String) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "usdSend",
+            "destination": destination,
+            "amount": amount.description,
+            "time": timestamp
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: true)
+    }
+
+    /// Transfer spot tokens to another address
+    /// - Parameters:
+    ///   - amount: Amount to transfer
+    ///   - destination: Destination address
+    ///   - token: Token identifier (e.g., "PURR:0xc4bf3f870c0e9465323c0b6ed28096c2")
+    /// - Returns: Transfer response as JSONResponse
+    public func spotTransfer(amount: Decimal, destination: String, token: String) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "spotSend",
+            "destination": destination,
+            "amount": amount.description,
+            "token": token,
+            "time": timestamp
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: true)
+    }
+
+    /// Transfer between main account and sub account
+    /// - Parameters:
+    ///   - subAccountUser: Sub account address
+    ///   - isDeposit: true to deposit to sub account, false to withdraw
+    ///   - usd: Amount in USD
+    /// - Returns: Transfer response as JSONResponse
+    public func subAccountTransfer(subAccountUser: String, isDeposit: Bool, usd: Decimal) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "subAccountTransfer",
+            "subAccountUser": subAccountUser,
+            "isDeposit": isDeposit,
+            "usd": usd.description
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: false)
+    }
+
+    /// Execute transfer action with proper signing
+    private func executeTransferAction(action: [String: any Sendable], timestamp: Int64, isUserSigned: Bool) async throws -> JSONResponse {
+        let request: [String: Any]
+
+        if isUserSigned {
+            // User-signed transfers use different signing method
+            request = try await createUserSignedRequest(action: action, timestamp: timestamp)
+        } else {
+            // L1 signed transfers
+            request = try await createSignedRequest(action: action, timestamp: timestamp)
+        }
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: request,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Create user-signed request for transfers
+    private func createUserSignedRequest(action: [String: any Sendable], timestamp: Int64) async throws -> [String: Any] {
+        // Convert to JSONResponse for Codable compatibility
+        let actionData = try JSONSerialization.data(withJSONObject: action)
+        let jsonResponse = try JSONDecoder().decode(JSONResponse.self, from: actionData)
+
+        // Use appropriate signing method based on transfer type
+        let signatureHex: String
+        if let type = action["type"] as? String {
+            switch type {
+            case "usdClassTransfer":
+                signatureHex = try CryptoService.signUsdClassTransferAction(
+                    action: jsonResponse,
+                    privateKey: privateKey,
+                    isMainnet: environment == .mainnet
+                )
+            case "usdSend":
+                signatureHex = try CryptoService.signUsdTransferAction(
+                    action: jsonResponse,
+                    privateKey: privateKey,
+                    isMainnet: environment == .mainnet
+                )
+            case "spotSend":
+                signatureHex = try CryptoService.signSpotTransferAction(
+                    action: jsonResponse,
+                    privateKey: privateKey,
+                    isMainnet: environment == .mainnet
+                )
+            default:
+                throw TradingServiceError.invalidTransferType
+            }
+        } else {
+            throw TradingServiceError.invalidTransferType
+        }
+
+        let signature = try convertSignatureToRSV(signatureHex)
+
+        return [
+            "action": action,
+            "nonce": timestamp,
+            "signature": signature
         ]
     }
 }

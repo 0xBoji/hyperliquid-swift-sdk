@@ -148,6 +148,74 @@ public struct CryptoService {
         
         return Data(jsonData.sha3(.keccak256))
     }
+
+    // MARK: - Transfer Signing Methods
+
+    /// Sign USD class transfer action
+    public static func signUsdClassTransferAction<T: Codable>(
+        action: T,
+        privateKey: PrivateKey,
+        isMainnet: Bool
+    ) throws -> String {
+        // USD class transfers use user signing (different from L1 actions)
+        return try signUserAction(action: action, privateKey: privateKey, isMainnet: isMainnet)
+    }
+
+    /// Sign USD transfer action
+    public static func signUsdTransferAction<T: Codable>(
+        action: T,
+        privateKey: PrivateKey,
+        isMainnet: Bool
+    ) throws -> String {
+        return try signUserAction(action: action, privateKey: privateKey, isMainnet: isMainnet)
+    }
+
+    /// Sign spot transfer action
+    public static func signSpotTransferAction<T: Codable>(
+        action: T,
+        privateKey: PrivateKey,
+        isMainnet: Bool
+    ) throws -> String {
+        return try signUserAction(action: action, privateKey: privateKey, isMainnet: isMainnet)
+    }
+
+    /// Sign user action (for transfers)
+    private static func signUserAction<T: Codable>(
+        action: T,
+        privateKey: PrivateKey,
+        isMainnet: Bool
+    ) throws -> String {
+        // Create action hash
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        let actionData = try encoder.encode(action)
+
+        // Create hash for signing
+        let hash = Data(actionData.sha3(.keccak256))
+
+        // Create EIP-712 payload for user signing
+        let domain = EIP712Domain(
+            name: "HyperliquidTransaction:User",
+            version: "1",
+            chainId: isMainnet ? 1 : 421614, // Arbitrum mainnet or testnet
+            verifyingContract: "0x0000000000000000000000000000000000000000"
+        )
+
+        let message = EIP712Message(
+            source: isMainnet ? "a" : "b",
+            connectionId: hash.prefix(16).hexString
+        )
+
+        let payload = EIP712Payload(
+            domain: domain,
+            primaryType: "HyperliquidTransaction",
+            types: EIP712Types(),
+            message: message
+        )
+
+        // Sign the payload
+        return try signEIP712(payload: payload, privateKey: privateKey)
+    }
 }
 
 // MARK: - Supporting Types

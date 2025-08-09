@@ -182,6 +182,34 @@ let referralState = try await client.queryReferralState(user: userAddress)
 let subAccounts = try await client.querySubAccounts(user: userAddress)
 ```
 
+### 💸 Transfer Operations
+
+```swift
+// Transfer USDC between spot and perp wallets
+let spotToPerp = try await client.usdClassTransfer(amount: Decimal(100.0), toPerp: true)
+let perpToSpot = try await client.usdClassTransfer(amount: Decimal(100.0), toPerp: false)
+
+// Transfer USDC to another address
+let usdTransfer = try await client.usdTransfer(
+    amount: Decimal(50.0),
+    destination: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45"
+)
+
+// Transfer spot tokens
+let spotTransfer = try await client.spotTransfer(
+    amount: Decimal(10.0),
+    destination: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+    token: "PURR:0xc4bf3f870c0e9465323c0b6ed28096c2"
+)
+
+// Transfer to/from sub account
+let subAccountDeposit = try await client.subAccountTransfer(
+    subAccountUser: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+    isDeposit: true,
+    usd: Decimal(25.0)
+)
+```
+
 ## 💡 Examples
 
 Run the included examples:
@@ -198,6 +226,9 @@ swift run AdvancedTradingExample
 
 # New Info API methods (fees, funding, referrals, sub accounts)
 swift run NewMethodsExample
+
+# Transfer operations (USD, spot tokens, sub accounts)
+swift run TransferExample
 ```
 
 ### Example Output:

@@ -135,9 +135,22 @@ struct NewMethodsExample {
                 print("⚠️ Combined analysis error: \(error)")
             }
             
+            // Example 8: Transfer Operations (requires authenticated client)
+            print("\n8️⃣ Transfer Operations")
+            print("=======================")
+            print("⚠️ Transfer operations require authenticated client with private key")
+            print("📝 These examples show method signatures - use with real credentials")
+
+            // Note: These would require real private key and sufficient balance
+            print("   💸 USD Class Transfer: client.usdClassTransfer(amount: 1.0, toPerp: true)")
+            print("   💸 USD Transfer: client.usdTransfer(amount: 1.0, destination: \"0x...\")")
+            print("   💸 Spot Transfer: client.spotTransfer(amount: 1.0, destination: \"0x...\", token: \"PURR:0x...\")")
+            print("   💸 Sub Account Transfer: client.subAccountTransfer(subAccountUser: \"0x...\", isDeposit: true, usd: 1.0)")
+
             print("\n🎉 New Methods Example Complete!")
             print("=================================")
             print("✅ All new Info API methods demonstrated")
+            print("✅ Transfer operations methods available")
             print("📚 Swift SDK now has complete feature parity with Python SDK")
             print("🚀 Ready for production use in iOS/macOS applications")
             
