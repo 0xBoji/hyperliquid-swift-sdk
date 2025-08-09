@@ -459,7 +459,7 @@ extension HyperliquidClient {
 
     /// Get funding history for a coin
     public func getFundingHistory(coin: String, startTime: Int64, endTime: Int64? = nil) async throws -> JSONResponse {
-        return try await infoService.getFundingHistory(coin: coin, startTime: startTime, endTime: endTime)
+        return try await infoService.getFundingHistory(coin: coin, startTime: Int(startTime), endTime: endTime != nil ? Int(endTime!) : nil)
     }
 
     /// Get candles/OHLCV data for a coin
@@ -481,6 +481,13 @@ extension HyperliquidClient {
     public func getUserFees(address: String) async throws -> JSONResponse {
         return try await infoService.getUserFees(address: address)
     }
+
+    /// Get user funding history
+    public func getUserFunding(user: String, startTime: Int, endTime: Int? = nil) async throws -> JSONResponse {
+        return try await infoService.getUserFunding(user: user, startTime: startTime, endTime: endTime)
+    }
+
+
 
     /// Get open orders with frontend information
     public func getFrontendOpenOrders(address: String) async throws -> JSONResponse {

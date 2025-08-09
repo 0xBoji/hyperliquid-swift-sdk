@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "userFunding", "user": "0xb7b6f3cea3f66bf525f5d8f965f6dbf6d9b017b2", "startTime": 1681923833000, "endTime": 1682010233000}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '131'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: '[{"delta":{"coin":"BTC","fundingRate":"0.0001","szi":"1.0","type":"funding","usdc":"5.0"},"hash":"0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890","time":1681923833000},{"delta":{"coin":"ETH","fundingRate":"0.00015","szi":"2.5","type":"funding","usdc":"12.5"},"hash":"0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef","time":1681952633000},{"delta":{"coin":"BTC","fundingRate":"0.00008","szi":"1.0","type":"funding","usdc":"4.0"},"hash":"0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321","time":1681981433000}]'
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '567'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1

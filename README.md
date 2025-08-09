@@ -147,6 +147,9 @@ let modifyResponse = try await client.modifyOrder(
 // Get open orders
 let openOrders = try await client.getOpenOrders()
 
+// Get enhanced frontend open orders (with trigger conditions)
+let frontendOrders = try await client.getFrontendOpenOrders(address: userAddress)
+
 // Get user fills
 let fills = try await client.getUserFills()
 
@@ -155,6 +158,28 @@ let recentFills = try await client.getUserFillsByTime(
     startTime: Date().addingTimeInterval(-86400), // 24 hours ago
     endTime: Date()
 )
+
+// Get user fees and trading volume
+let userFees = try await client.getUserFees(address: userAddress)
+
+// Get user funding history
+let fundingHistory = try await client.getUserFunding(
+    user: userAddress,
+    startTime: Int(Date().addingTimeInterval(-86400).timeIntervalSince1970 * 1000),
+    endTime: Int(Date().timeIntervalSince1970 * 1000)
+)
+
+// Get funding rate history for a specific coin
+let btcFunding = try await client.getFundingHistory(
+    coin: "BTC",
+    startTime: Int(Date().addingTimeInterval(-86400).timeIntervalSince1970 * 1000)
+)
+
+// Query referral state
+let referralState = try await client.queryReferralState(user: userAddress)
+
+// Query sub accounts
+let subAccounts = try await client.querySubAccounts(user: userAddress)
 ```
 
 ## 💡 Examples
@@ -170,6 +195,9 @@ swift run TradingExample
 
 # Advanced trading operations (market orders, cancel all, modify)
 swift run AdvancedTradingExample
+
+# New Info API methods (fees, funding, referrals, sub accounts)
+swift run NewMethodsExample
 ```
 
 ### Example Output:

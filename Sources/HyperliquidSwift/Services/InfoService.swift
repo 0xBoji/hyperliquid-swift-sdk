@@ -301,23 +301,7 @@ public actor InfoService: HTTPService {
         )
     }
 
-    func getFundingHistory(coin: String, startTime: Int64, endTime: Int64? = nil) async throws -> JSONResponse {
-        var payload: [String: Any] = [
-            "type": "fundingHistory",
-            "coin": coin,
-            "startTime": startTime
-        ]
 
-        if let endTime = endTime {
-            payload["endTime"] = endTime
-        }
-
-        return try await httpClient.postAndDecode(
-            path: "/info",
-            payload: payload,
-            responseType: JSONResponse.self
-        )
-    }
 
     func getCandlesSnapshot(coin: String, interval: String, startTime: Int64, endTime: Int64) async throws -> JSONResponse {
         return try await httpClient.postAndDecode(
@@ -371,7 +355,7 @@ public actor InfoService: HTTPService {
         )
     }
 
-    func getUserFees(address: String) async throws -> JSONResponse {
+    public func getUserFees(address: String) async throws -> JSONResponse {
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: ["type": "userFees", "user": address],
@@ -379,7 +363,7 @@ public actor InfoService: HTTPService {
         )
     }
 
-    func getFrontendOpenOrders(address: String) async throws -> JSONResponse {
+    public func getFrontendOpenOrders(address: String) async throws -> JSONResponse {
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: ["type": "frontendOpenOrders", "user": address],
@@ -387,33 +371,7 @@ public actor InfoService: HTTPService {
         )
     }
 
-    func queryReferralState(user: String) async throws -> JSONResponse {
-        return try await httpClient.postAndDecode(
-            path: "/info",
-            payload: ["type": "referral", "user": user],
-            responseType: JSONResponse.self
-        )
-    }
 
-    func querySubAccounts(user: String) async throws -> JSONResponse {
-        // Sub accounts API returns different format, handle as raw response
-        do {
-            return try await httpClient.postAndDecode(
-                path: "/info",
-                payload: ["type": "subAccounts", "user": user],
-                responseType: JSONResponse.self
-            )
-        } catch {
-            // If JSON parsing fails, create a simple error response
-            let errorData = try JSONSerialization.data(withJSONObject: [
-                "status": "error",
-                "message": "Sub accounts API response format not supported",
-                "originalError": error.localizedDescription
-            ])
-            let decoder = JSONDecoder()
-            return try decoder.decode(JSONResponse.self, from: errorData)
-        }
-    }
 
     // MARK: - Staking Methods
 
@@ -467,15 +425,6 @@ public actor InfoService: HTTPService {
     }
 
     // MARK: - Missing Methods for Feature Parity
-
-    /// Get user fees and trading volume information
-    public func getUserFees(address: String) async throws -> JSONResponse {
-        return try await httpClient.postAndDecode(
-            path: "/info",
-            payload: ["type": "userFees", "user": address],
-            responseType: JSONResponse.self
-        )
-    }
 
     /// Get user funding payments history
     public func getUserFunding(user: String, startTime: Int, endTime: Int? = nil) async throws -> JSONResponse {

@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "referral", "user": "0x1234567890123456789012345678901234567890"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '73'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: '{"state":"active","code":"ABC123","referredBy":null,"totalReferred":0,"referralDiscount":"0.0","totalReferralRewards":"0.0"}'
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '123'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1

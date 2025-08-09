@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "frontendOpenOrders", "user": "0xCB331197E84f135AB9Ed6FB51Cd9757c0bd29d0D", "dex": ""}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '84'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: '[{"children":[],"coin":"INJ","isPositionTpsl":false,"isTrigger":true,"limitPx":"9.2037","oid":3184595907,"orderType":"Take Profit Market","origSz":"12.5","reduceOnly":true,"side":"A","sz":"12.5","tif":null,"timestamp":1700126022555,"triggerCondition":"Price above 10.004","triggerPx":"10.004"},{"children":[],"coin":"INJ","isPositionTpsl":false,"isTrigger":true,"limitPx":"9.1954","oid":3184595906,"orderType":"Stop Market","origSz":"12.5","reduceOnly":true,"side":"A","sz":"12.5","tif":null,"timestamp":1700126022555,"triggerCondition":"Price below 9.995","triggerPx":"9.995"},{"children":[{"children":[],"coin":"INJ","isPositionTpsl":false,"isTrigger":true,"limitPx":"9.1954","oid":3184595906,"orderType":"Stop Market","origSz":"12.5","reduceOnly":true,"side":"A","sz":"12.5","tif":null,"timestamp":1700126022555,"triggerCondition":"Price below 9.995","triggerPx":"9.995"},{"children":[],"coin":"INJ","isPositionTpsl":false,"isTrigger":true,"limitPx":"9.2037","oid":3184595907,"orderType":"Take Profit Market","origSz":"12.5","reduceOnly":true,"side":"A","sz":"12.5","tif":null,"timestamp":1700126022555,"triggerCondition":"Price above 10.004","triggerPx":"10.004"}],"coin":"INJ","isPositionTpsl":false,"isTrigger":false,"limitPx":"10.0","oid":3184595905,"orderType":"Limit","origSz":"12.5","reduceOnly":false,"side":"B","sz":"12.5","tif":"Gtc","timestamp":1700126022555,"triggerCondition":"N/A","triggerPx":"0.0"}]'
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '1417'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1

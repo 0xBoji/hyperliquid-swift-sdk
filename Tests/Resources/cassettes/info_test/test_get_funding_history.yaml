@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "fundingHistory", "coin": "BTC", "startTime": 1681923833000, "endTime": 1684811870000}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '95'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: '[{"coin":"BTC","fundingRate":"0.0001","premium":"0.0002","time":1681923833000},{"coin":"BTC","fundingRate":"0.00015","premium":"0.00025","time":1681952633000},{"coin":"BTC","fundingRate":"0.00008","premium":"0.00018","time":1681981433000},{"coin":"BTC","fundingRate":"0.00012","premium":"0.00022","time":1682010233000},{"coin":"BTC","fundingRate":"0.00009","premium":"0.00019","time":1682039033000}]'
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '456'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1

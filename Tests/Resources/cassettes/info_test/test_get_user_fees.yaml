@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body:
+      string: '{"type": "userFees", "user": "0x1234567890123456789012345678901234567890"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '75'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - HyperliquidSwift/1.0.0
+    method: POST
+    uri: https://api.hyperliquid-testnet.xyz/info
+  response:
+    body:
+      string: '{"activeReferralDiscount":"0.0","dailyUserVlm":[],"feeSchedule":{"add":"0.0002","cross":"0.0005","referralDiscount":"0.0","tiers":{"mm":[],"vip":[]}},"userAddRate":"0.0002","userCrossRate":"0.0005"}'
+    headers:
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '234'
+      Date:
+      - Wed, 05 Aug 2025 10:30:00 GMT
+      Server:
+      - nginx/1.18.0
+    status:
+      code: 200
+      message: OK
+version: 1

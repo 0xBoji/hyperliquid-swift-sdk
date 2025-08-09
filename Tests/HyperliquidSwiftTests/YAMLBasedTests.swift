@@ -438,138 +438,142 @@ struct YAMLDecoder {
     // MARK: - New Methods Tests
 
     func testGetFrontendOpenOrders() async throws {
-        mockClient.mockResponse = """
-        [
-            {
-                "children": [],
-                "coin": "BTC",
-                "isPositionTpsl": false,
-                "isTrigger": false,
-                "limitPx": "50000.0",
-                "oid": 12345,
-                "orderType": "Limit",
-                "origSz": "1.0",
-                "reduceOnly": false,
-                "side": "B",
-                "sz": "1.0",
-                "tif": "Gtc",
-                "timestamp": 1640995200000,
-                "triggerCondition": "N/A",
-                "triggerPx": "0.0"
-            }
-        ]
-        """
+        // Load cassette data
+        let cassette = try loadCassette(name: "test_get_frontend_open_orders")
+        mockClient.setMockResponse(cassette.response)
 
-        let frontendOrders = try await infoService.getFrontendOpenOrders(address: "0x1234567890123456789012345678901234567890")
+        // Execute request
+        let frontendOrders = try await infoService.getFrontendOpenOrders(address: "0xCB331197E84f135AB9Ed6FB51Cd9757c0bd29d0D")
+
+        // Verify request was made correctly
+        XCTAssertEqual(mockClient.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(mockClient.lastRequest?.url?.path, "/info")
+
+        // Verify request body
+        let requestBody = try XCTUnwrap(mockClient.lastRequestBody)
+        let requestJSON = try JSONSerialization.jsonObject(with: requestBody) as? [String: Any]
+        XCTAssertEqual(requestJSON?["type"] as? String, "frontendOpenOrders")
+        XCTAssertEqual(requestJSON?["user"] as? String, "0xCB331197E84f135AB9Ed6FB51Cd9757c0bd29d0D")
 
         XCTAssertNotNil(frontendOrders)
-        print("✅ Frontend open orders test passed")
+        print("✅ Frontend open orders cassette test passed")
     }
 
     func testGetUserFees() async throws {
-        mockClient.mockResponse = """
-        {
-            "activeReferralDiscount": "0.0",
-            "dailyUserVlm": [],
-            "feeSchedule": {
-                "add": "0.0002",
-                "cross": "0.0005",
-                "referralDiscount": "0.0",
-                "tiers": {
-                    "mm": [],
-                    "vip": []
-                }
-            },
-            "userAddRate": "0.0002",
-            "userCrossRate": "0.0005"
-        }
-        """
+        // Load cassette data
+        let cassette = try loadCassette(name: "test_get_user_fees")
+        mockClient.setMockResponse(cassette.response)
 
+        // Execute request
         let userFees = try await infoService.getUserFees(address: "0x1234567890123456789012345678901234567890")
 
+        // Verify request was made correctly
+        XCTAssertEqual(mockClient.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(mockClient.lastRequest?.url?.path, "/info")
+
+        // Verify request body
+        let requestBody = try XCTUnwrap(mockClient.lastRequestBody)
+        let requestJSON = try JSONSerialization.jsonObject(with: requestBody) as? [String: Any]
+        XCTAssertEqual(requestJSON?["type"] as? String, "userFees")
+        XCTAssertEqual(requestJSON?["user"] as? String, "0x1234567890123456789012345678901234567890")
+
         XCTAssertNotNil(userFees)
-        print("✅ User fees test passed")
+        print("✅ User fees cassette test passed")
     }
 
     func testGetUserFunding() async throws {
-        mockClient.mockResponse = """
-        [
-            {
-                "delta": {
-                    "coin": "BTC",
-                    "fundingRate": "0.0001",
-                    "szi": "1.0",
-                    "type": "funding",
-                    "usdc": "5.0"
-                },
-                "hash": "0xabcdef1234567890",
-                "time": 1640995200000
-            }
-        ]
-        """
+        // Load cassette data
+        let cassette = try loadCassette(name: "test_get_user_funding")
+        mockClient.setMockResponse(cassette.response)
 
+        // Execute request
         let userFunding = try await infoService.getUserFunding(
-            user: "0x1234567890123456789012345678901234567890",
-            startTime: 1640995200000,
-            endTime: 1640995300000
+            user: "0xb7b6f3cea3f66bf525f5d8f965f6dbf6d9b017b2",
+            startTime: 1681923833000,
+            endTime: 1682010233000
         )
 
+        // Verify request was made correctly
+        XCTAssertEqual(mockClient.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(mockClient.lastRequest?.url?.path, "/info")
+
+        // Verify request body
+        let requestBody = try XCTUnwrap(mockClient.lastRequestBody)
+        let requestJSON = try JSONSerialization.jsonObject(with: requestBody) as? [String: Any]
+        XCTAssertEqual(requestJSON?["type"] as? String, "userFunding")
+        XCTAssertEqual(requestJSON?["user"] as? String, "0xb7b6f3cea3f66bf525f5d8f965f6dbf6d9b017b2")
+
         XCTAssertNotNil(userFunding)
-        print("✅ User funding test passed")
+        print("✅ User funding cassette test passed")
     }
 
     func testGetFundingHistory() async throws {
-        mockClient.mockResponse = """
-        [
-            {
-                "coin": "BTC",
-                "fundingRate": "0.0001",
-                "premium": "0.0002",
-                "time": 1640995200000
-            }
-        ]
-        """
+        // Load cassette data
+        let cassette = try loadCassette(name: "test_get_funding_history")
+        mockClient.setMockResponse(cassette.response)
 
+        // Execute request
         let fundingHistory = try await infoService.getFundingHistory(
             coin: "BTC",
-            startTime: 1640995200000,
-            endTime: 1640995300000
+            startTime: 1681923833000,
+            endTime: 1684811870000
         )
 
+        // Verify request was made correctly
+        XCTAssertEqual(mockClient.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(mockClient.lastRequest?.url?.path, "/info")
+
+        // Verify request body
+        let requestBody = try XCTUnwrap(mockClient.lastRequestBody)
+        let requestJSON = try JSONSerialization.jsonObject(with: requestBody) as? [String: Any]
+        XCTAssertEqual(requestJSON?["type"] as? String, "fundingHistory")
+        XCTAssertEqual(requestJSON?["coin"] as? String, "BTC")
+
         XCTAssertNotNil(fundingHistory)
-        print("✅ Funding history test passed")
+        print("✅ Funding history cassette test passed")
     }
 
     func testQueryReferralState() async throws {
-        mockClient.mockResponse = """
-        {
-            "state": "active",
-            "code": "ABC123",
-            "referredBy": null,
-            "totalReferred": 0
-        }
-        """
+        // Load cassette data
+        let cassette = try loadCassette(name: "test_query_referral_state")
+        mockClient.setMockResponse(cassette.response)
 
+        // Execute request
         let referralState = try await infoService.queryReferralState(user: "0x1234567890123456789012345678901234567890")
 
+        // Verify request was made correctly
+        XCTAssertEqual(mockClient.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(mockClient.lastRequest?.url?.path, "/info")
+
+        // Verify request body
+        let requestBody = try XCTUnwrap(mockClient.lastRequestBody)
+        let requestJSON = try JSONSerialization.jsonObject(with: requestBody) as? [String: Any]
+        XCTAssertEqual(requestJSON?["type"] as? String, "referral")
+        XCTAssertEqual(requestJSON?["user"] as? String, "0x1234567890123456789012345678901234567890")
+
         XCTAssertNotNil(referralState)
-        print("✅ Referral state test passed")
+        print("✅ Referral state cassette test passed")
     }
 
     func testQuerySubAccounts() async throws {
-        mockClient.mockResponse = """
-        [
-            {
-                "name": "SubAccount1",
-                "address": "0x1111111111111111111111111111111111111111",
-                "permissions": ["trade", "transfer"]
-            }
-        ]
-        """
+        // Load cassette data
+        let cassette = try loadCassette(name: "test_query_sub_accounts")
+        mockClient.setMockResponse(cassette.response)
 
+        // Execute request
         let subAccounts = try await infoService.querySubAccounts(user: "0x1234567890123456789012345678901234567890")
 
+        // Verify request was made correctly
+        XCTAssertEqual(mockClient.lastRequest?.httpMethod, "POST")
+        XCTAssertEqual(mockClient.lastRequest?.url?.path, "/info")
+
+        // Verify request body
+        let requestBody = try XCTUnwrap(mockClient.lastRequestBody)
+        let requestJSON = try JSONSerialization.jsonObject(with: requestBody) as? [String: Any]
+        XCTAssertEqual(requestJSON?["type"] as? String, "subAccounts")
+        XCTAssertEqual(requestJSON?["user"] as? String, "0x1234567890123456789012345678901234567890")
+
         XCTAssertNotNil(subAccounts)
-        print("✅ Sub accounts test passed")
+        print("✅ Sub accounts cassette test passed")
     }
 }
