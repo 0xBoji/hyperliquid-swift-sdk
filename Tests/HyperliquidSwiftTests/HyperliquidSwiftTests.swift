@@ -31,13 +31,13 @@ final class HyperliquidSwiftTests: XCTestCase {
     
     func testAuthenticatedClientCreation() throws {
         // Test authenticated client creation
-        let client = try HyperliquidClient.authenticated(privateKey: testPrivateKey)
+        let client = try HyperliquidClient.trading(privateKeyHex: testPrivateKey, environment: .testnet)
         XCTAssertNotNil(client)
     }
     
     func testInvalidPrivateKeyThrows() {
         // Test invalid private key throws error
-        XCTAssertThrowsError(try HyperliquidClient.authenticated(privateKey: "invalid")) { error in
+        XCTAssertThrowsError(try HyperliquidClient.trading(privateKeyHex: "invalid", environment: .testnet)) { error in
             XCTAssertTrue(error is HyperliquidError)
             if case .invalidPrivateKey = error as? HyperliquidError {
                 // Expected error type
@@ -156,8 +156,8 @@ final class HyperliquidSwiftTests: XCTestCase {
         // Verify price format
         for (symbol, price) in response {
             XCTAssertFalse(symbol.isEmpty, "Symbol should not be empty")
-            XCTAssertNotNil(Double(price), "Price should be valid number: \(price)")
-            XCTAssertGreaterThan(Double(price) ?? 0, 0, "Price should be positive")
+            XCTAssertNotNil(Double(price.description), "Price should be valid number: \(price)")
+            XCTAssertGreaterThan(Double(price.description) ?? 0, 0, "Price should be positive")
         }
 
         print("✅ Found \(response.count) markets")
@@ -202,10 +202,10 @@ final class HyperliquidSwiftTests: XCTestCase {
 
         // Verify margin summary structure
         let marginSummary = response.crossMarginSummary
-        XCTAssertFalse(marginSummary.accountValue.isEmpty, "Account value should not be empty")
-        XCTAssertFalse(marginSummary.totalMarginUsed.isEmpty, "Total margin used should not be empty")
-        XCTAssertFalse(marginSummary.totalNtlPos.isEmpty, "Total notional position should not be empty")
-        XCTAssertFalse(marginSummary.totalRawUsd.isEmpty, "Total raw USD should not be empty")
+        XCTAssertGreaterThanOrEqual(marginSummary.accountValue, 0, "Account value should be non-negative")
+        XCTAssertGreaterThanOrEqual(marginSummary.totalMarginUsed, 0, "Total margin used should be non-negative")
+        XCTAssertGreaterThanOrEqual(marginSummary.totalNtlPos, 0, "Total notional position should be non-negative")
+        XCTAssertGreaterThanOrEqual(marginSummary.totalRawUsd, 0, "Total raw USD should be non-negative")
 
         print("✅ User state retrieved with \(response.assetPositions.count) positions")
     }
@@ -219,12 +219,12 @@ final class HyperliquidSwiftTests: XCTestCase {
         // Verify order structure if orders exist
         for order in response {
             XCTAssertFalse(order.coin.isEmpty, "Order coin should not be empty")
-            XCTAssertFalse(order.limitPx.isEmpty, "Limit price should not be empty")
+            XCTAssertGreaterThan(order.limitPx, 0, "Limit price should be positive")
             XCTAssertGreaterThan(order.oid, 0, "Order ID should be positive")
             XCTAssertTrue(["B", "A"].contains(order.side), "Side should be B or A")
-            XCTAssertFalse(order.sz.isEmpty, "Size should not be empty")
+            XCTAssertGreaterThan(order.sz, 0, "Size should be positive")
             XCTAssertGreaterThan(order.timestamp, 0, "Timestamp should be positive")
-            XCTAssertFalse(order.origSz.isEmpty, "Original size should not be empty")
+            XCTAssertGreaterThan(order.origSz, 0, "Original size should be positive")
         }
 
         print("✅ Found \(response.count) open orders")

@@ -7,7 +7,8 @@ final class HyperliquidClientTests: XCTestCase {
         let client = try HyperliquidClient.readOnly(environment: .testnet)
         let isAuth = await client.isAuthenticated
         XCTAssertFalse(isAuth)
-        XCTAssertNil(client.walletAddress)
+        let walletAddr = await client.walletAddress
+        XCTAssertNil(walletAddr)
     }
     
     func testTradingClientCreation() async throws {
@@ -15,7 +16,8 @@ final class HyperliquidClientTests: XCTestCase {
         let client = try HyperliquidClient.trading(privateKeyHex: privateKeyHex, environment: .testnet)
         let isAuth = await client.isAuthenticated
         XCTAssertTrue(isAuth)
-        XCTAssertNotNil(client.walletAddress)
+        let walletAddr = await client.walletAddress
+        XCTAssertNotNil(walletAddr)
     }
     
     func testInvalidPrivateKey() {
@@ -24,11 +26,13 @@ final class HyperliquidClientTests: XCTestCase {
         }
     }
     
-    func testEnvironmentConfiguration() throws {
+    func testEnvironmentConfiguration() async throws {
         let mainnetClient = try HyperliquidClient.readOnly(environment: .mainnet)
-        XCTAssertEqual(mainnetClient.environment, .mainnet)
-        
+        let mainnetEnv = await mainnetClient.environment
+        XCTAssertEqual(mainnetEnv, .mainnet)
+
         let testnetClient = try HyperliquidClient.readOnly(environment: .testnet)
-        XCTAssertEqual(testnetClient.environment, .testnet)
+        let testnetEnv = await testnetClient.environment
+        XCTAssertEqual(testnetEnv, .testnet)
     }
 }
