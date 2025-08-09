@@ -434,4 +434,142 @@ struct YAMLDecoder {
         
         return try JSONEncoder().encode(mockCassette)
     }
+
+    // MARK: - New Methods Tests
+
+    func testGetFrontendOpenOrders() async throws {
+        mockClient.mockResponse = """
+        [
+            {
+                "children": [],
+                "coin": "BTC",
+                "isPositionTpsl": false,
+                "isTrigger": false,
+                "limitPx": "50000.0",
+                "oid": 12345,
+                "orderType": "Limit",
+                "origSz": "1.0",
+                "reduceOnly": false,
+                "side": "B",
+                "sz": "1.0",
+                "tif": "Gtc",
+                "timestamp": 1640995200000,
+                "triggerCondition": "N/A",
+                "triggerPx": "0.0"
+            }
+        ]
+        """
+
+        let frontendOrders = try await infoService.getFrontendOpenOrders(address: "0x1234567890123456789012345678901234567890")
+
+        XCTAssertNotNil(frontendOrders)
+        print("✅ Frontend open orders test passed")
+    }
+
+    func testGetUserFees() async throws {
+        mockClient.mockResponse = """
+        {
+            "activeReferralDiscount": "0.0",
+            "dailyUserVlm": [],
+            "feeSchedule": {
+                "add": "0.0002",
+                "cross": "0.0005",
+                "referralDiscount": "0.0",
+                "tiers": {
+                    "mm": [],
+                    "vip": []
+                }
+            },
+            "userAddRate": "0.0002",
+            "userCrossRate": "0.0005"
+        }
+        """
+
+        let userFees = try await infoService.getUserFees(address: "0x1234567890123456789012345678901234567890")
+
+        XCTAssertNotNil(userFees)
+        print("✅ User fees test passed")
+    }
+
+    func testGetUserFunding() async throws {
+        mockClient.mockResponse = """
+        [
+            {
+                "delta": {
+                    "coin": "BTC",
+                    "fundingRate": "0.0001",
+                    "szi": "1.0",
+                    "type": "funding",
+                    "usdc": "5.0"
+                },
+                "hash": "0xabcdef1234567890",
+                "time": 1640995200000
+            }
+        ]
+        """
+
+        let userFunding = try await infoService.getUserFunding(
+            user: "0x1234567890123456789012345678901234567890",
+            startTime: 1640995200000,
+            endTime: 1640995300000
+        )
+
+        XCTAssertNotNil(userFunding)
+        print("✅ User funding test passed")
+    }
+
+    func testGetFundingHistory() async throws {
+        mockClient.mockResponse = """
+        [
+            {
+                "coin": "BTC",
+                "fundingRate": "0.0001",
+                "premium": "0.0002",
+                "time": 1640995200000
+            }
+        ]
+        """
+
+        let fundingHistory = try await infoService.getFundingHistory(
+            coin: "BTC",
+            startTime: 1640995200000,
+            endTime: 1640995300000
+        )
+
+        XCTAssertNotNil(fundingHistory)
+        print("✅ Funding history test passed")
+    }
+
+    func testQueryReferralState() async throws {
+        mockClient.mockResponse = """
+        {
+            "state": "active",
+            "code": "ABC123",
+            "referredBy": null,
+            "totalReferred": 0
+        }
+        """
+
+        let referralState = try await infoService.queryReferralState(user: "0x1234567890123456789012345678901234567890")
+
+        XCTAssertNotNil(referralState)
+        print("✅ Referral state test passed")
+    }
+
+    func testQuerySubAccounts() async throws {
+        mockClient.mockResponse = """
+        [
+            {
+                "name": "SubAccount1",
+                "address": "0x1111111111111111111111111111111111111111",
+                "permissions": ["trade", "transfer"]
+            }
+        ]
+        """
+
+        let subAccounts = try await infoService.querySubAccounts(user: "0x1234567890123456789012345678901234567890")
+
+        XCTAssertNotNil(subAccounts)
+        print("✅ Sub accounts test passed")
+    }
 }

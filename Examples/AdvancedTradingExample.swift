@@ -237,6 +237,52 @@ struct AdvancedTradingExample {
                 print("✅ Perp deploy auction status: \(resp.dictionary)")
             } catch { print("⚠️ queryPerpDeployAuctionStatus error: \(error)") }
 
+            // MARK: - New Info Methods
+            print("\n🆕 New Info Methods")
+            print("==================")
+
+            // Create info service for new methods
+            let infoService = try InfoService(environment: .testnet)
+
+            do {
+                let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
+                let resp = try await infoService.getUserFees(address: address)
+                print("✅ User fees: \(resp.dictionary)")
+            } catch { print("⚠️ getUserFees error: \(error)") }
+
+            do {
+                let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
+                let oneDayAgo = Int(Date().timeIntervalSince1970 * 1000) - (24 * 60 * 60 * 1000)
+                let now = Int(Date().timeIntervalSince1970 * 1000)
+                let resp = try await infoService.getUserFunding(user: address, startTime: oneDayAgo, endTime: now)
+                print("✅ User funding: \(resp.dictionary)")
+            } catch { print("⚠️ getUserFunding error: \(error)") }
+
+            do {
+                let oneDayAgo = Int(Date().timeIntervalSince1970 * 1000) - (24 * 60 * 60 * 1000)
+                let now = Int(Date().timeIntervalSince1970 * 1000)
+                let resp = try await infoService.getFundingHistory(coin: "BTC", startTime: oneDayAgo, endTime: now)
+                print("✅ Funding history: \(resp.dictionary)")
+            } catch { print("⚠️ getFundingHistory error: \(error)") }
+
+            do {
+                let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
+                let resp = try await infoService.getFrontendOpenOrders(address: address)
+                print("✅ Frontend open orders: \(resp.dictionary)")
+            } catch { print("⚠️ getFrontendOpenOrders error: \(error)") }
+
+            do {
+                let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
+                let resp = try await infoService.queryReferralState(user: address)
+                print("✅ Referral state: \(resp.dictionary)")
+            } catch { print("⚠️ queryReferralState error: \(error)") }
+
+            do {
+                let address = "0x7ad252d01d9130eb86eb7b154c8bb6f1922434e7"
+                let resp = try await infoService.querySubAccounts(user: address)
+                print("✅ Sub accounts: \(resp.dictionary)")
+            } catch { print("⚠️ querySubAccounts error: \(error)") }
+
             // MARK: - Sub Account (state-changing)
             print("\n👤 Sub Account")
             print("==============")

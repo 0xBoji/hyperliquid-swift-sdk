@@ -153,11 +153,61 @@ final class IntegrationTests: XCTestCase {
     
     func testUserFeesWithTestAddress() async throws {
         let testAddress = "0x0000000000000000000000000000000000000000"
-        
-        let userFees = try await readOnlyClient.getUserFees(user: testAddress)
-        
+
+        let userFees = try await readOnlyClient.getUserFees(address: testAddress)
+
         XCTAssertNotNil(userFees)
         print("💳 Test user fees has \(userFees.keys.count) fields")
+    }
+
+    func testUserFundingWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+
+        // Test last 7 days
+        let sevenDaysAgo = Int(Date().timeIntervalSince1970 * 1000) - (7 * 24 * 60 * 60 * 1000)
+        let now = Int(Date().timeIntervalSince1970 * 1000)
+
+        let userFunding = try await readOnlyClient.getUserFunding(
+            user: testAddress,
+            startTime: sevenDaysAgo,
+            endTime: now
+        )
+
+        XCTAssertNotNil(userFunding)
+        print("💰 Test user funding has \(userFunding.keys.count) fields")
+    }
+
+    func testFundingHistoryWithBTC() async throws {
+        // Test last 24 hours
+        let oneDayAgo = Int(Date().timeIntervalSince1970 * 1000) - (24 * 60 * 60 * 1000)
+        let now = Int(Date().timeIntervalSince1970 * 1000)
+
+        let fundingHistory = try await readOnlyClient.getFundingHistory(
+            coin: "BTC",
+            startTime: oneDayAgo,
+            endTime: now
+        )
+
+        XCTAssertNotNil(fundingHistory)
+        print("📈 BTC funding history has \(fundingHistory.keys.count) fields")
+    }
+
+    func testQueryReferralStateWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+
+        let referralState = try await readOnlyClient.queryReferralState(user: testAddress)
+
+        XCTAssertNotNil(referralState)
+        print("🎁 Test user referral state has \(referralState.keys.count) fields")
+    }
+
+    func testQuerySubAccountsWithTestAddress() async throws {
+        let testAddress = "0x0000000000000000000000000000000000000000"
+
+        let subAccounts = try await readOnlyClient.querySubAccounts(user: testAddress)
+
+        XCTAssertNotNil(subAccounts)
+        print("👥 Test user sub accounts has \(subAccounts.keys.count) fields")
     }
     
     // MARK: - Error Handling Tests

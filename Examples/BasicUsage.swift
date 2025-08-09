@@ -153,31 +153,49 @@ struct BasicUsageExample {
                 assert(fillTimeMs <= now, "Fill time should not be in future")
             }
             
-            // Example 5: Get referral state (with validation)
-            print("\n5️⃣ Getting referral state...")
-            let referralState = try await client.queryReferralState()
-            print("✅ Referral state: \(referralState.state)")
-            if let code = referralState.code {
-                print("   🎁 Referral code: \(code)")
-            }
+            // Example 5: Get user fees and trading volume
+            print("\n5️⃣ Getting user fees...")
+            let userFees = try await client.getUserFees(address: testAddress)
+            print("✅ User fees retrieved")
+            print("   💳 Fee structure: \(userFees.keys.count) fields")
 
-            // Validate referral state structure
-            assert(!referralState.state.isEmpty, "Referral state should not be empty")
+            // Example 6: Get user funding history
+            print("\n6️⃣ Getting user funding history...")
+            let userFunding = try await client.getUserFunding(
+                user: testAddress,
+                startTime: oneDayAgo,
+                endTime: now
+            )
+            print("✅ User funding history retrieved")
+            print("   💰 Funding records: \(userFunding.keys.count) fields")
 
-            // Example 6: Get sub-accounts (with validation)
-            print("\n6️⃣ Getting sub-accounts...")
-            let subAccounts = try await client.querySubAccounts()
-            print("✅ User has \(subAccounts.count) sub-accounts")
+            // Example 7: Get funding history for BTC
+            print("\n7️⃣ Getting BTC funding history...")
+            let fundingHistory = try await client.getFundingHistory(
+                coin: "BTC",
+                startTime: oneDayAgo,
+                endTime: now
+            )
+            print("✅ BTC funding history retrieved")
+            print("   📈 Funding data: \(fundingHistory.keys.count) fields")
 
-            // Validate sub-account structure if any exist
-            for subAccount in subAccounts.prefix(3) {
-                print("   👥 Sub-account: \(subAccount.subAccountUser)")
+            // Example 8: Get frontend open orders (enhanced)
+            print("\n8️⃣ Getting frontend open orders...")
+            let frontendOrders = try await client.getFrontendOpenOrders(address: testAddress)
+            print("✅ Frontend open orders retrieved")
+            print("   🖥️ Enhanced order data: \(frontendOrders.keys.count) fields")
 
-                // Validate sub-account fields
-                assert(!subAccount.subAccountUser.isEmpty, "Sub-account user should not be empty")
-                assert(subAccount.subAccountUser.hasPrefix("0x"), "Sub-account user should be valid address")
-                assert(subAccount.clearinghouseState.crossMaintenanceMarginUsed >= 0, "Maintenance margin should be non-negative")
-            }
+            // Example 9: Get referral state
+            print("\n9️⃣ Getting referral state...")
+            let referralState = try await client.queryReferralState(user: testAddress)
+            print("✅ Referral state retrieved")
+            print("   🎁 Referral info: \(referralState.keys.count) fields")
+
+            // Example 10: Get sub-accounts
+            print("\n🔟 Getting sub-accounts...")
+            let subAccounts = try await client.querySubAccounts(user: testAddress)
+            print("✅ Sub-accounts retrieved")
+            print("   👥 Sub-account data: \(subAccounts.keys.count) fields")
 
             // Example 7: Query order by ID (with proper error handling)
             print("\n7️⃣ Querying order status...")
