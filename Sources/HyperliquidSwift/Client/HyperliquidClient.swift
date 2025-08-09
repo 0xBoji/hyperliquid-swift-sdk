@@ -248,12 +248,12 @@ public struct AccountSummary: Sendable {
 
     /// Total unrealized PnL
     public var totalUnrealizedPnl: Decimal {
-        return userState.assetPositions.reduce(0) { $0 + $1.unrealizedPnl }
+        return userState.assetPositions.reduce(0) { $0 + $1.position.unrealizedPnl }
     }
 
     /// Number of open positions
     public var openPositionsCount: Int {
-        return userState.assetPositions.filter { $0.szi != 0 }.count
+        return userState.assetPositions.filter { $0.position.szi != 0 }.count
     }
 
     /// Number of open orders

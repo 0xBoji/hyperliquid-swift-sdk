@@ -260,8 +260,8 @@ final class HyperliquidSwiftTests: XCTestCase {
 
         let response = try await readOnlyClient.getUserFillsByTime(
             user: testAddress,
-            startTime: startTime,
-            endTime: endTime
+            startTime: Int(startTime),
+            endTime: Int(endTime)
         )
 
         XCTAssertNotNil(response, "Response should not be nil")

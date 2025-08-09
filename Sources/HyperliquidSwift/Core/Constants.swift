@@ -59,12 +59,21 @@ public enum Constants {
         public static let heartbeatInterval: TimeInterval = 30.0
         public static let maxReconnectAttempts = 5
         public static let reconnectDelay: TimeInterval = 2.0
-        
+
         public enum Channels {
             public static let allMids = "allMids"
             public static let l2Book = "l2Book"
             public static let trades = "trades"
             public static let userEvents = "userEvents"
         }
+    }
+
+    // MARK: - Error Codes
+    public enum ErrorCodes {
+        public static let networkError = "NETWORK_ERROR"
+        public static let authenticationRequired = "AUTHENTICATION_REQUIRED"
+        public static let invalidPrivateKey = "INVALID_PRIVATE_KEY"
+        public static let invalidAddress = "INVALID_ADDRESS"
+        public static let invalidOrderSize = "INVALID_ORDER_SIZE"
     }
 }

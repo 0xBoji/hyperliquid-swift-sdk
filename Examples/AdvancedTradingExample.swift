@@ -60,7 +60,7 @@ struct AdvancedTradingExample {
             if !openOrders.isEmpty {
                 print("📋 Open orders:")
                 for order in openOrders.prefix(3) {
-                    print("   • \(order.coin): \(order.sz) @ \(order.px) (\(order.side))")
+                    print("   • \(order.coin): \(order.sz) @ \(order.limitPx) (\(order.side))")
                 }
             }
 
@@ -80,7 +80,7 @@ struct AdvancedTradingExample {
                     let modifyResponse = try await client.modifyOrder(
                         oid: firstOrder.oid,
                         coin: firstOrder.coin,
-                        newPrice: firstOrder.px * Decimal(1.01), // 1% higher
+                        newPrice: firstOrder.limitPx * Decimal(1.01), // 1% higher
                         newSize: firstOrder.sz * Decimal(0.9)    // 10% smaller
                     )
                     print("✅ Modify order response: \(modifyResponse.dictionary)")

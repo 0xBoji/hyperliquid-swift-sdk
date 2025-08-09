@@ -15,9 +15,9 @@ final class YAMLBasedTests: XCTestCase {
     
     override func setUpWithError() throws {
         try super.setUpWithError()
-        
+
         mockClient = MockHTTPClient()
-        infoService = InfoService(httpClient: mockClient)
+        infoService = try InfoService(environment: .testnet)
     }
     
     override func tearDownWithError() throws {
@@ -47,9 +47,9 @@ final class YAMLBasedTests: XCTestCase {
         
         // Verify response data
         XCTAssertFalse(mids.isEmpty)
-        XCTAssertEqual(mids["BTC"], "43250.5")
-        XCTAssertEqual(mids["ETH"], "2680.25")
-        XCTAssertEqual(mids["SOL"], "98.75")
+        XCTAssertEqual(mids["BTC"], Decimal(string: "43250.5")!)
+        XCTAssertEqual(mids["ETH"], Decimal(string: "2680.25")!)
+        XCTAssertEqual(mids["SOL"], Decimal(string: "98.75")!)
         
         print("✅ Loaded \(mids.count) market prices from cassette")
     }
@@ -75,19 +75,19 @@ final class YAMLBasedTests: XCTestCase {
         // Verify first position (BTC)
         let btcPosition = userState.assetPositions[0]
         XCTAssertEqual(btcPosition.position.coin, "BTC")
-        XCTAssertEqual(btcPosition.position.entryPx, "43200.0")
-        XCTAssertEqual(btcPosition.position.szi, "0.1")
-        XCTAssertEqual(btcPosition.position.unrealizedPnl, "5.0")
-        
+        XCTAssertEqual(btcPosition.position.entryPx, Decimal(string: "43200.0")!)
+        XCTAssertEqual(btcPosition.position.szi, Decimal(string: "0.1")!)
+        XCTAssertEqual(btcPosition.position.unrealizedPnl, Decimal(string: "5.0")!)
+
         // Verify second position (ETH)
         let ethPosition = userState.assetPositions[1]
         XCTAssertEqual(ethPosition.position.coin, "ETH")
-        XCTAssertEqual(ethPosition.position.entryPx, "2675.0")
-        XCTAssertEqual(ethPosition.position.szi, "1.0")
-        
+        XCTAssertEqual(ethPosition.position.entryPx, Decimal(string: "2675.0")!)
+        XCTAssertEqual(ethPosition.position.szi, Decimal(string: "1.0")!)
+
         // Verify margin summary
-        XCTAssertEqual(userState.crossMarginSummary.accountValue, "10075.0")
-        XCTAssertEqual(userState.crossMarginSummary.totalMarginUsed, "3052.5")
+        XCTAssertEqual(userState.crossMarginSummary.accountValue, Decimal(string: "10075.0")!)
+        XCTAssertEqual(userState.crossMarginSummary.totalMarginUsed, Decimal(string: "3052.5")!)
         XCTAssertEqual(userState.crossMaintenanceMarginUsed, 152.625)
         
         print("✅ Loaded user state with \(userState.assetPositions.count) positions from cassette")
@@ -119,19 +119,19 @@ final class YAMLBasedTests: XCTestCase {
         let components = try loadComponentSchemas()
         
         // Verify key schemas exist
-        XCTAssertNotNil(components.schemas["FloatString"])
-        XCTAssertNotNil(components.schemas["Address"])
-        XCTAssertNotNil(components.schemas["UserState"])
-        XCTAssertNotNil(components.schemas["AssetPosition"])
-        XCTAssertNotNil(components.schemas["OpenOrder"])
-        XCTAssertNotNil(components.schemas["Fill"])
-        
+        XCTAssertNotNil(components.components.schemas["FloatString"])
+        XCTAssertNotNil(components.components.schemas["Address"])
+        XCTAssertNotNil(components.components.schemas["UserState"])
+        XCTAssertNotNil(components.components.schemas["AssetPosition"])
+        XCTAssertNotNil(components.components.schemas["OpenOrder"])
+        XCTAssertNotNil(components.components.schemas["Fill"])
+
         // Verify FloatString pattern
-        let floatStringSchema = components.schemas["FloatString"]
+        let floatStringSchema = components.components.schemas["FloatString"]
         XCTAssertEqual(floatStringSchema?.pattern, "^\\d+\\.?\\d*$")
-        
+
         // Verify Address pattern
-        let addressSchema = components.schemas["Address"]
+        let addressSchema = components.components.schemas["Address"]
         XCTAssertEqual(addressSchema?.pattern, "^0x[a-fA-F0-9]{40}$")
         
         print("✅ Component schema validation passed")

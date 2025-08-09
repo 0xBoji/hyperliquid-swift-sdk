@@ -41,7 +41,31 @@ public enum HyperliquidError: Error, LocalizedError, Sendable {
     // MARK: - Configuration Errors
     case configurationError(String)
     case unsupportedOperation(String)
-    
+
+    /// Error code for categorizing errors
+    public var errorCode: String {
+        switch self {
+        case .networkError, .invalidURL, .timeout, .connectionLost:
+            return Constants.ErrorCodes.networkError
+        case .requestFailed:
+            return Constants.ErrorCodes.networkError
+        case .invalidPrivateKey, .signingFailed:
+            return Constants.ErrorCodes.invalidPrivateKey
+        case .authenticationRequired, .clientNotInitialized:
+            return Constants.ErrorCodes.authenticationRequired
+        case .responseParsingFailed, .invalidInput, .missingRequiredField, .invalidFormat:
+            return "VALIDATION_ERROR"
+        case .invalidOrder, .orderNotFound, .positionNotFound, .insufficientBalance, .marketClosed:
+            return "TRADING_ERROR"
+        case .webSocketError, .subscriptionFailed:
+            return "WEBSOCKET_ERROR"
+        case .apiError, .rateLimitExceeded, .serverError:
+            return "API_ERROR"
+        case .configurationError, .unsupportedOperation:
+            return "CONFIGURATION_ERROR"
+        }
+    }
+
     public var errorDescription: String? {
         switch self {
         case .networkError(let message):

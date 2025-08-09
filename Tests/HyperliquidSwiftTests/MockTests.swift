@@ -46,8 +46,8 @@ final class MockTests: XCTestCase {
         
         XCTAssertEqual(userState.assetPositions.count, 1)
         XCTAssertEqual(userState.assetPositions[0].position.coin, "BTC")
-        XCTAssertEqual(userState.assetPositions[0].position.szi, "1.0")
-        XCTAssertEqual(userState.crossMarginSummary.accountValue, "51000.0")
+        XCTAssertEqual(userState.assetPositions[0].position.szi, Decimal(string: "1.0")!)
+        XCTAssertEqual(userState.crossMarginSummary.accountValue, Decimal(string: "51000.0")!)
         XCTAssertEqual(userState.crossMaintenanceMarginUsed, 500.0)
     }
     
@@ -107,10 +107,10 @@ final class MockTests: XCTestCase {
         let order = try JSONDecoder().decode(OpenOrder.self, from: json)
         
         XCTAssertEqual(order.coin, "BTC")
-        XCTAssertEqual(order.limitPx, "50000.0")
+        XCTAssertEqual(order.limitPx, Decimal(string: "50000.0")!)
         XCTAssertEqual(order.oid, 12345)
-        XCTAssertEqual(order.side, "B")
-        XCTAssertEqual(order.sz, "1.0")
+        XCTAssertEqual(order.side, Side.buy)
+        XCTAssertEqual(order.sz, Decimal(string: "1.0")!)
         XCTAssertEqual(order.cloid, "client123")
     }
     
@@ -183,7 +183,7 @@ final class MockTests: XCTestCase {
         let subAccount = try JSONDecoder().decode(SubAccount.self, from: json)
         
         XCTAssertEqual(subAccount.subAccountUser, "0x1234567890123456789012345678901234567890")
-        XCTAssertEqual(subAccount.clearinghouseState.crossMarginSummary.accountValue, "1000.0")
+        XCTAssertEqual(subAccount.clearinghouseState.crossMarginSummary.accountValue, Decimal(string: "1000.0")!)
     }
     
     // MARK: - JSONResponse Tests
@@ -264,14 +264,14 @@ final class MockTests: XCTestCase {
     func testDataHexExtension() {
         // Test Data hex extension
         let hexString = "deadbeef"
-        let data = Data(hex: hexString)
-        
+        let data: Data? = Data(hex: hexString)
+
         XCTAssertNotNil(data)
         XCTAssertEqual(data?.count, 4) // 4 bytes
-        
+
         // Test invalid hex
         let invalidHex = "invalid"
-        let invalidData = Data(hex: invalidHex)
+        let invalidData: Data? = Data(hex: invalidHex)
         XCTAssertNil(invalidData)
     }
     

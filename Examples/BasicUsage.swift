@@ -115,7 +115,7 @@ struct BasicUsageExample {
 
             // Validate order structure if orders exist
             for order in openOrders.prefix(3) {
-                print("   📋 \(order.coin): \(order.side == .buy ? "Buy" : "Sell") \(order.sz) @ $\(order.px)")
+                print("   📋 \(order.coin): \(order.side == .buy ? "Buy" : "Sell") \(order.sz) @ $\(order.limitPx)")
 
                 // Validate order fields
                 assert(!order.coin.isEmpty, "Order coin should not be empty")

@@ -9,12 +9,18 @@ public actor InfoService: HTTPService {
     public let httpClient: HTTPClient
     
     // MARK: - Initialization
-    
+
     public init(environment: HyperliquidEnvironment) throws {
         self.environment = environment
-        
+
         let config = HTTPClient.Configuration(baseURL: environment.apiURL)
         self.httpClient = try HTTPClient(configuration: config)
+    }
+
+    // For testing purposes - allows injection of mock HTTP client
+    internal init(environment: HyperliquidEnvironment, httpClient: HTTPClient) {
+        self.environment = environment
+        self.httpClient = httpClient
     }
     
     // MARK: - Market Data Methods
@@ -443,15 +449,26 @@ public actor InfoService: HTTPService {
 
 // MARK: - Supporting Types
 
+/// Asset position wrapper
+public struct AssetPosition: Codable, Sendable {
+    public let position: Position
+    public let type: String
+
+    public init(position: Position, type: String = "oneWay") {
+        self.position = position
+        self.type = type
+    }
+}
+
 /// User state information
 public struct UserState: Codable, Sendable {
-    public let assetPositions: [Position]
+    public let assetPositions: [AssetPosition]
     public let crossMarginSummary: CrossMarginSummary
     public let crossMaintenanceMarginUsed: Decimal
     public let time: Int64
 
     public init(
-        assetPositions: [Position],
+        assetPositions: [AssetPosition],
         crossMarginSummary: CrossMarginSummary,
         crossMaintenanceMarginUsed: Decimal,
         time: Int64
@@ -466,7 +483,7 @@ public struct UserState: Codable, Sendable {
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        assetPositions = try container.decode([Position].self, forKey: .assetPositions)
+        assetPositions = try container.decode([AssetPosition].self, forKey: .assetPositions)
         crossMarginSummary = try container.decode(CrossMarginSummary.self, forKey: .crossMarginSummary)
         time = try container.decode(Int64.self, forKey: .time)
 

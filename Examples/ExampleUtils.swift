@@ -130,8 +130,8 @@ public struct ExampleUtils {
         if !userState.assetPositions.isEmpty {
             print("\nPositions:")
             for position in userState.assetPositions {
-                let entryPxStr = position.entryPx != nil ? String(describing: position.entryPx!) : "N/A"
-                print("  \(position.coin): \(position.szi) @ $\(entryPxStr) (PnL: $\(position.unrealizedPnl))")
+                let entryPxStr = position.position.entryPx != nil ? String(describing: position.position.entryPx!) : "N/A"
+                print("  \(position.position.coin): \(position.position.szi) @ $\(entryPxStr) (PnL: $\(position.position.unrealizedPnl))")
             }
         }
         
@@ -142,7 +142,7 @@ public struct ExampleUtils {
             print("\nOpen Orders:")
             for order in openOrders.prefix(5) {
                 let side = order.side == .buy ? "Buy" : "Sell"
-                print("  \(order.coin): \(side) \(order.sz) @ $\(order.px)")
+                print("  \(order.coin): \(side) \(order.sz) @ $\(order.limitPx)")
             }
             if openOrders.count > 5 {
                 print("  ... and \(openOrders.count - 5) more")

@@ -39,7 +39,7 @@ public struct OpenOrder: Codable, Sendable {
     public let coin: String
     public let side: Side
     public let sz: Decimal
-    public let px: Decimal
+    public let limitPx: Decimal
     public let oid: OrderID
     public let timestamp: Int64
     public let origSz: Decimal
@@ -49,7 +49,7 @@ public struct OpenOrder: Codable, Sendable {
         coin: String,
         side: Side,
         sz: Decimal,
-        px: Decimal,
+        limitPx: Decimal,
         oid: OrderID,
         timestamp: Int64,
         origSz: Decimal,
@@ -58,7 +58,7 @@ public struct OpenOrder: Codable, Sendable {
         self.coin = coin
         self.side = side
         self.sz = sz
-        self.px = px
+        self.limitPx = limitPx
         self.oid = oid
         self.timestamp = timestamp
         self.origSz = origSz
