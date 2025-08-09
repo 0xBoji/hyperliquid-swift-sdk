@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build
+        run: swift build -v
+        working-directory: hyperliquid-swift-sdk
+
+      - name: Run tests (skip network-heavy when requested)
+        run: |
+          echo "Running tests"
+          swift test -v
+        working-directory: hyperliquid-swift-sdk
+

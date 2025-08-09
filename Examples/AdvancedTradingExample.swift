@@ -210,6 +210,36 @@ struct AdvancedTradingExample {
                         oid: 123456789, // placeholder
                         order: BulkOrderRequest(coin: "ETH", isBuy: true, sz: 0.001, px: 1000, orderType: .limit)
                     )
+
+            // MARK: - Info Parity Utilities
+            print("\n🧭 Info Utilities")
+            print("================")
+
+            do {
+                let resp = try await client.getPerpDexs()
+                print("✅ PerpDexs: \(resp.dictionary)")
+            } catch { print("⚠️ getPerpDexs error: \(error)") }
+
+            do {
+                let (address, _) = try await ExampleUtils.setup()
+                let resp = try await client.queryUserToMultiSigSigners(user: address)
+                print("✅ MultiSig signers: \(resp.dictionary)")
+            } catch { print("⚠️ queryUserToMultiSigSigners error: \(error)") }
+
+            do {
+                let resp = try await client.queryPerpDeployAuctionStatus()
+                print("✅ Perp deploy auction status: \(resp.dictionary)")
+            } catch { print("⚠️ queryPerpDeployAuctionStatus error: \(error)") }
+
+            // MARK: - Sub Account (state-changing)
+            print("\n👤 Sub Account")
+            print("==============")
+            do {
+                // WARNING: This creates a new sub account. Keep as example only.
+                let resp = try await client.createSubAccount(name: "SampleSubAccount")
+                print("✅ Create sub account: \(resp.dictionary)")
+            } catch { print("⚠️ createSubAccount error: \(error)") }
+
                 ]
                 let resp = try await client.bulkModifyOrders(modifies)
                 print("✅ Batch modify response: \(resp.dictionary)")

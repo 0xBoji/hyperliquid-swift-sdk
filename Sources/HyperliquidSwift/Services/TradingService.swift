@@ -418,6 +418,22 @@ public final class TradingService: Sendable {
         )
     }
 
+    // Create Sub Account (Python: create_sub_account)
+    func createSubAccount(name: String) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let action: [String: any Sendable] = [
+            "type": "createSubAccount",
+            "name": name
+        ]
+        let request = try await createSignedRequest(action: action, timestamp: timestamp)
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: request,
+            responseType: JSONResponse.self
+        )
+    }
+
+
 
     // Place multiple orders in a single request (bulk orders)
     func bulkOrders(_ orders: [BulkOrderRequest]) async throws -> JSONResponse {

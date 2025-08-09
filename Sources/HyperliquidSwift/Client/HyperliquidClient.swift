@@ -553,4 +553,25 @@ extension HyperliquidClient {
         guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
         return try await tradingService.setReferrer(code: code)
     }
+
+    public func getPerpDexs() async throws -> JSONResponse {
+        guard let infoService = infoService else { throw HyperliquidError.clientNotInitialized }
+        return try await infoService.getPerpDexs()
+    }
+
+    public func queryUserToMultiSigSigners(user: String) async throws -> JSONResponse {
+        guard let infoService = infoService else { throw HyperliquidError.clientNotInitialized }
+        return try await infoService.queryUserToMultiSigSigners(user: user)
+    }
+
+    public func queryPerpDeployAuctionStatus() async throws -> JSONResponse {
+        guard let infoService = infoService else { throw HyperliquidError.clientNotInitialized }
+        return try await infoService.queryPerpDeployAuctionStatus()
+    }
+
+    public func createSubAccount(name: String) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.createSubAccount(name: name)
+    }
+
 }

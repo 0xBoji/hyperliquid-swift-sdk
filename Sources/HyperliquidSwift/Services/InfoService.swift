@@ -155,10 +155,10 @@ public actor InfoService: HTTPService {
     /// Query referral state
     public func queryReferralState(address: String) async throws -> ReferralState {
         let payload = [
-            "type": "referralState",
+            "type": "referral",
             "user": address
         ]
-        
+
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: payload,
@@ -413,7 +413,32 @@ public actor InfoService: HTTPService {
             payload: ["type": "userStakingRewards", "user": address],
             responseType: JSONResponse.self
         )
+    
+    // MARK: - New Info API Parity Methods
+    public func getPerpDexs() async throws -> JSONResponse {
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: ["type": "perpDexs"],
+            responseType: JSONResponse.self
+        )
     }
+
+    public func queryUserToMultiSigSigners(user: String) async throws -> JSONResponse {
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: ["type": "userToMultiSigSigners", "user": user],
+            responseType: JSONResponse.self
+        )
+    }
+
+    public func queryPerpDeployAuctionStatus() async throws -> JSONResponse {
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: ["type": "perpDeployAuctionStatus"],
+            responseType: JSONResponse.self
+        )
+    }
+}
 }
 
 // MARK: - Supporting Types
