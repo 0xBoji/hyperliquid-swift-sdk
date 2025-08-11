@@ -179,6 +179,24 @@ public struct CryptoService {
         return try signUserAction(action: action, privateKey: privateKey, isMainnet: isMainnet)
     }
 
+    /// Sign send asset action
+    public static func signSendAssetAction<T: Codable>(
+        action: T,
+        privateKey: PrivateKey,
+        isMainnet: Bool
+    ) throws -> String {
+        return try signUserAction(action: action, privateKey: privateKey, isMainnet: isMainnet)
+    }
+
+    /// Sign approve agent action
+    public static func signApproveAgentAction<T: Codable>(
+        action: T,
+        privateKey: PrivateKey,
+        isMainnet: Bool
+    ) throws -> String {
+        return try signUserAction(action: action, privateKey: privateKey, isMainnet: isMainnet)
+    }
+
     /// Sign user action (for transfers)
     private static func signUserAction<T: Codable>(
         action: T,

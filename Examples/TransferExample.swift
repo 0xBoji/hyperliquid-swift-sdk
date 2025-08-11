@@ -120,8 +120,111 @@ struct TransferExample {
                 print("💡 This is expected with test private key")
             }
             
-            // Example 5: Safety Best Practices
-            print("\n5️⃣ Safety Best Practices")
+            // Example 5: Vault USD Transfer
+            print("\n5️⃣ Vault USD Transfer")
+            print("======================")
+            do {
+                let vaultAddress = "0xa15099a30bbf2e68942d6f4c43d70d04faeab0a0" // Testnet HLP vault
+
+                print("🏦 Depositing $5 to vault \(vaultAddress)...")
+                let response = try await client.vaultUsdTransfer(
+                    vaultAddress: vaultAddress,
+                    isDeposit: true,
+                    usd: 5_000_000 // $5 in micro-USD
+                )
+                print("✅ Vault deposit successful!")
+                print("📄 Response: \(response.dictionary)")
+
+                // Withdraw from vault
+                print("\n🏦 Withdrawing $5 from vault...")
+                let withdrawResponse = try await client.vaultUsdTransfer(
+                    vaultAddress: vaultAddress,
+                    isDeposit: false,
+                    usd: 5_000_000
+                )
+                print("✅ Vault withdrawal successful!")
+                print("📄 Response: \(withdrawResponse.dictionary)")
+
+            } catch {
+                print("❌ Vault transfer failed: \(error)")
+                print("💡 This is expected with test private key")
+            }
+
+            // Example 6: Send Asset Between DEXs
+            print("\n6️⃣ Send Asset Between DEXs")
+            print("============================")
+            do {
+                let destinationAddress = "0x0000000000000000000000000000000000000000"
+
+                print("🔄 Sending 1.0 USDC from perp to spot...")
+                let response = try await client.sendAsset(
+                    destination: destinationAddress,
+                    sourceDex: "", // Empty string for default perp
+                    destinationDex: "spot",
+                    token: "USDC",
+                    amount: Decimal(1.0)
+                )
+                print("✅ Asset transfer successful!")
+                print("📄 Response: \(response.dictionary)")
+
+            } catch {
+                print("❌ Send asset failed: \(error)")
+                print("💡 This is expected with test private key")
+            }
+
+            // Example 7: Sub Account Spot Transfer
+            print("\n7️⃣ Sub Account Spot Transfer")
+            print("=============================")
+            do {
+                let subAccountAddress = "0x0000000000000000000000000000000000000000"
+
+                print("👥 Depositing 1.0 USDC to sub account spot wallet...")
+                let response = try await client.subAccountSpotTransfer(
+                    subAccountUser: subAccountAddress,
+                    isDeposit: true,
+                    token: "USDC",
+                    amount: Decimal(1.0)
+                )
+                print("✅ Sub account spot deposit successful!")
+                print("📄 Response: \(response.dictionary)")
+
+                // Withdraw from sub account
+                print("\n👥 Withdrawing 1.0 USDC from sub account spot wallet...")
+                let withdrawResponse = try await client.subAccountSpotTransfer(
+                    subAccountUser: subAccountAddress,
+                    isDeposit: false,
+                    token: "USDC",
+                    amount: Decimal(1.0)
+                )
+                print("✅ Sub account spot withdrawal successful!")
+                print("📄 Response: \(withdrawResponse.dictionary)")
+
+            } catch {
+                print("❌ Sub account spot transfer failed: \(error)")
+                print("💡 This is expected with test private key")
+            }
+
+            // Example 8: Approve Agent
+            print("\n8️⃣ Approve Agent")
+            print("=================")
+            do {
+                let agentAddress = "0x0000000000000000000000000000000000000000"
+
+                print("🤖 Approving agent \(agentAddress) for automated trading...")
+                let response = try await client.approveAgent(
+                    agentAddress: agentAddress,
+                    agentName: "TestTradingBot"
+                )
+                print("✅ Agent approval successful!")
+                print("📄 Response: \(response.dictionary)")
+
+            } catch {
+                print("❌ Agent approval failed: \(error)")
+                print("💡 This is expected with test private key")
+            }
+
+            // Example 9: Safety Best Practices
+            print("\n9️⃣ Safety Best Practices")
             print("=========================")
             print("🔒 Always validate addresses before transfers")
             print("💰 Start with small test amounts")
@@ -130,8 +233,8 @@ struct TransferExample {
             print("🔄 Implement proper error handling")
             print("📝 Log all transfer operations for audit")
             
-            // Example 6: Error Handling Patterns
-            print("\n6️⃣ Error Handling Patterns")
+            // Example 10: Error Handling Patterns
+            print("\n🔟 Error Handling Patterns")
             print("===========================")
             
             // Demonstrate proper error handling
@@ -152,7 +255,11 @@ struct TransferExample {
             
             print("\n🎯 Transfer Example Complete!")
             print("==============================")
-            print("✅ All transfer methods demonstrated")
+            print("✅ All 8 transfer methods demonstrated")
+            print("🏦 Vault operations for institutional trading")
+            print("🔄 Asset transfers between DEXs")
+            print("👥 Sub account spot transfers")
+            print("🤖 Agent approval for automation")
             print("⚠️ Remember: Use real credentials and testnet for actual testing")
             print("🚀 Ready for integration into iOS/macOS applications")
             

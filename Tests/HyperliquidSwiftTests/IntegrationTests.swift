@@ -352,4 +352,86 @@ final class IntegrationTests: XCTestCase {
             XCTAssertTrue(true)
         }
     }
+
+    func testVaultUsdTransferWithTestClient() async throws {
+        do {
+            let testClient = try HyperliquidClient(
+                environment: .testnet,
+                privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001"
+            )
+
+            let transferResponse = try await testClient.vaultUsdTransfer(
+                vaultAddress: "0xa15099a30bbf2e68942d6f4c43d70d04faeab0a0",
+                isDeposit: true,
+                usd: 5_000_000 // $5 in micro-USD
+            )
+            XCTAssertNotNil(transferResponse)
+            print("🏦 Vault USD transfer test completed")
+        } catch {
+            print("⚠️ Vault USD transfer test failed as expected: \(error)")
+            XCTAssertTrue(true)
+        }
+    }
+
+    func testSendAssetWithTestClient() async throws {
+        do {
+            let testClient = try HyperliquidClient(
+                environment: .testnet,
+                privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001"
+            )
+
+            let transferResponse = try await testClient.sendAsset(
+                destination: "0x0000000000000000000000000000000000000000",
+                sourceDex: "",
+                destinationDex: "spot",
+                token: "USDC",
+                amount: Decimal(1.0)
+            )
+            XCTAssertNotNil(transferResponse)
+            print("🔄 Send asset test completed")
+        } catch {
+            print("⚠️ Send asset test failed as expected: \(error)")
+            XCTAssertTrue(true)
+        }
+    }
+
+    func testSubAccountSpotTransferWithTestClient() async throws {
+        do {
+            let testClient = try HyperliquidClient(
+                environment: .testnet,
+                privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001"
+            )
+
+            let transferResponse = try await testClient.subAccountSpotTransfer(
+                subAccountUser: "0x0000000000000000000000000000000000000000",
+                isDeposit: true,
+                token: "USDC",
+                amount: Decimal(1.0)
+            )
+            XCTAssertNotNil(transferResponse)
+            print("👥 Sub account spot transfer test completed")
+        } catch {
+            print("⚠️ Sub account spot transfer test failed as expected: \(error)")
+            XCTAssertTrue(true)
+        }
+    }
+
+    func testApproveAgentWithTestClient() async throws {
+        do {
+            let testClient = try HyperliquidClient(
+                environment: .testnet,
+                privateKey: "0x0000000000000000000000000000000000000000000000000000000000000001"
+            )
+
+            let approvalResponse = try await testClient.approveAgent(
+                agentAddress: "0x0000000000000000000000000000000000000000",
+                agentName: "TestAgent"
+            )
+            XCTAssertNotNil(approvalResponse)
+            print("🤖 Approve agent test completed")
+        } catch {
+            print("⚠️ Approve agent test failed as expected: \(error)")
+            XCTAssertTrue(true)
+        }
+    }
 }

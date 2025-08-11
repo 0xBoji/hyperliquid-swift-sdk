@@ -648,6 +648,91 @@ public final class TradingService: Sendable {
         return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: false)
     }
 
+    /// Transfer USD to/from vault
+    /// - Parameters:
+    ///   - vaultAddress: Vault address
+    ///   - isDeposit: true to deposit to vault, false to withdraw
+    ///   - usd: Amount in USD (in micro-USD, e.g., 1000000 = $1)
+    /// - Returns: Transfer response as JSONResponse
+    public func vaultUsdTransfer(vaultAddress: String, isDeposit: Bool, usd: Int) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "vaultTransfer",
+            "vaultAddress": vaultAddress,
+            "isDeposit": isDeposit,
+            "usd": usd
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: false)
+    }
+
+    /// Send asset between DEXs
+    /// - Parameters:
+    ///   - destination: Destination address
+    ///   - sourceDex: Source DEX (empty string for default perp, "spot" for spot)
+    ///   - destinationDex: Destination DEX
+    ///   - token: Token identifier
+    ///   - amount: Amount to transfer
+    /// - Returns: Transfer response as JSONResponse
+    public func sendAsset(destination: String, sourceDex: String, destinationDex: String, token: String, amount: Decimal) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "sendAsset",
+            "destination": destination,
+            "sourceDex": sourceDex,
+            "destinationDex": destinationDex,
+            "token": token,
+            "amount": amount.description,
+            "fromSubAccount": "", // Will be set by vault if needed
+            "nonce": timestamp
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: true)
+    }
+
+    /// Transfer spot tokens between main account and sub account
+    /// - Parameters:
+    ///   - subAccountUser: Sub account address
+    ///   - isDeposit: true to deposit to sub account, false to withdraw
+    ///   - token: Token identifier
+    ///   - amount: Amount to transfer
+    /// - Returns: Transfer response as JSONResponse
+    public func subAccountSpotTransfer(subAccountUser: String, isDeposit: Bool, token: String, amount: Decimal) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        let action: [String: any Sendable] = [
+            "type": "subAccountSpotTransfer",
+            "subAccountUser": subAccountUser,
+            "isDeposit": isDeposit,
+            "token": token,
+            "amount": amount.description
+        ]
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: false)
+    }
+
+    /// Approve agent for automated trading
+    /// - Parameters:
+    ///   - agentAddress: Agent address to approve
+    ///   - agentName: Name of the agent (optional)
+    /// - Returns: Approval response as JSONResponse
+    public func approveAgent(agentAddress: String, agentName: String? = nil) async throws -> JSONResponse {
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+
+        var action: [String: any Sendable] = [
+            "type": "approveAgent",
+            "agentAddress": agentAddress
+        ]
+
+        if let agentName = agentName {
+            action["agentName"] = agentName
+        }
+
+        return try await executeTransferAction(action: action, timestamp: timestamp, isUserSigned: true)
+    }
+
     /// Execute transfer action with proper signing
     private func executeTransferAction(action: [String: any Sendable], timestamp: Int64, isUserSigned: Bool) async throws -> JSONResponse {
         let request: [String: Any]
@@ -691,6 +776,18 @@ public final class TradingService: Sendable {
                 )
             case "spotSend":
                 signatureHex = try CryptoService.signSpotTransferAction(
+                    action: jsonResponse,
+                    privateKey: privateKey,
+                    isMainnet: environment == .mainnet
+                )
+            case "sendAsset":
+                signatureHex = try CryptoService.signSendAssetAction(
+                    action: jsonResponse,
+                    privateKey: privateKey,
+                    isMainnet: environment == .mainnet
+                )
+            case "approveAgent":
+                signatureHex = try CryptoService.signApproveAgentAction(
                     action: jsonResponse,
                     privateKey: privateKey,
                     isMainnet: environment == .mainnet

@@ -630,4 +630,58 @@ extension HyperliquidClient {
         return try await tradingService.subAccountTransfer(subAccountUser: subAccountUser, isDeposit: isDeposit, usd: usd)
     }
 
+    /// Transfer USD to/from vault
+    /// - Parameters:
+    ///   - vaultAddress: Vault address
+    ///   - isDeposit: true to deposit to vault, false to withdraw
+    ///   - usd: Amount in USD (in micro-USD, e.g., 1000000 = $1)
+    /// - Returns: Transfer response as JSONResponse
+    public func vaultUsdTransfer(vaultAddress: String, isDeposit: Bool, usd: Int) async throws -> JSONResponse {
+        guard let tradingService = tradingService else {
+            throw HyperliquidError.clientNotInitialized
+        }
+        return try await tradingService.vaultUsdTransfer(vaultAddress: vaultAddress, isDeposit: isDeposit, usd: usd)
+    }
+
+    /// Send asset between DEXs
+    /// - Parameters:
+    ///   - destination: Destination address
+    ///   - sourceDex: Source DEX (empty string for default perp, "spot" for spot)
+    ///   - destinationDex: Destination DEX
+    ///   - token: Token identifier
+    ///   - amount: Amount to transfer
+    /// - Returns: Transfer response as JSONResponse
+    public func sendAsset(destination: String, sourceDex: String, destinationDex: String, token: String, amount: Decimal) async throws -> JSONResponse {
+        guard let tradingService = tradingService else {
+            throw HyperliquidError.clientNotInitialized
+        }
+        return try await tradingService.sendAsset(destination: destination, sourceDex: sourceDex, destinationDex: destinationDex, token: token, amount: amount)
+    }
+
+    /// Transfer spot tokens between main account and sub account
+    /// - Parameters:
+    ///   - subAccountUser: Sub account address
+    ///   - isDeposit: true to deposit to sub account, false to withdraw
+    ///   - token: Token identifier
+    ///   - amount: Amount to transfer
+    /// - Returns: Transfer response as JSONResponse
+    public func subAccountSpotTransfer(subAccountUser: String, isDeposit: Bool, token: String, amount: Decimal) async throws -> JSONResponse {
+        guard let tradingService = tradingService else {
+            throw HyperliquidError.clientNotInitialized
+        }
+        return try await tradingService.subAccountSpotTransfer(subAccountUser: subAccountUser, isDeposit: isDeposit, token: token, amount: amount)
+    }
+
+    /// Approve agent for automated trading
+    /// - Parameters:
+    ///   - agentAddress: Agent address to approve
+    ///   - agentName: Name of the agent (optional)
+    /// - Returns: Approval response as JSONResponse
+    public func approveAgent(agentAddress: String, agentName: String? = nil) async throws -> JSONResponse {
+        guard let tradingService = tradingService else {
+            throw HyperliquidError.clientNotInitialized
+        }
+        return try await tradingService.approveAgent(agentAddress: agentAddress, agentName: agentName)
+    }
+
 }

@@ -208,6 +208,36 @@ let subAccountDeposit = try await client.subAccountTransfer(
     isDeposit: true,
     usd: Decimal(25.0)
 )
+
+// Vault USD transfer (institutional trading)
+let vaultDeposit = try await client.vaultUsdTransfer(
+    vaultAddress: "0xa15099a30bbf2e68942d6f4c43d70d04faeab0a0",
+    isDeposit: true,
+    usd: 5_000_000 // $5 in micro-USD
+)
+
+// Send asset between DEXs
+let assetTransfer = try await client.sendAsset(
+    destination: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+    sourceDex: "",
+    destinationDex: "spot",
+    token: "USDC",
+    amount: Decimal(10.0)
+)
+
+// Sub account spot transfer
+let subSpotTransfer = try await client.subAccountSpotTransfer(
+    subAccountUser: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+    isDeposit: true,
+    token: "USDC",
+    amount: Decimal(5.0)
+)
+
+// Approve agent for automated trading
+let agentApproval = try await client.approveAgent(
+    agentAddress: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+    agentName: "TradingBot"
+)
 ```
 
 ## 💡 Examples
