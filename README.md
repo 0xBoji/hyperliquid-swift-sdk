@@ -11,6 +11,8 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
 - **🔐 Complete Trading API**: Place orders, cancel orders, manage positions
 - **📊 Real-time Market Data**: Prices, order books, trade history
 - **💰 Account Management**: Portfolio tracking, balance queries, user state
+- **💸 Transfer Operations**: USD, spot tokens, sub-accounts, vault transfers
+- **🔧 Advanced Features**: Multi-sig, token delegation, bridge operations
 - **🔒 EIP-712 Signing**: Secure transaction signing with Ethereum standards
 - **⚡️ Type Safety**: Full Swift type system with Codable support
 - **🎯 Async/Await**: Modern Swift concurrency support
@@ -23,6 +25,7 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
 - Trading
   - [x] Limit/Market orders, Modify, Cancel, Schedule cancel
   - [x] Bulk orders and Batch modify orders
+  - [x] Cancel by client order ID, Cancel all orders
 - Market Data & Queries
   - [x] All mids, L2 order book, Candle snapshot
   - [x] Meta, MetaAndAssetCtxs, SpotMeta, SpotMetaAndAssetCtxs
@@ -35,6 +38,14 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
   - [x] Update leverage, Update isolated margin, Set referrer
 - Sub Accounts
   - [x] Create sub account
+- Transfer Operations
+  - [x] USD class transfer, USD transfer, Spot transfer
+  - [x] Sub account transfer, Vault USD transfer, Send asset
+  - [x] Sub account spot transfer, Approve agent
+- Advanced Features
+  - [x] Token delegate, Withdraw from bridge
+  - [x] Approve builder fee, Convert to multi-sig user
+  - [x] Multi-sig operations, Use big blocks
 - Real‑time
   - [x] WebSocket subscriptions
 
@@ -93,8 +104,14 @@ let prices = try await client.getAllMids()
 // Get exchange metadata
 let meta = try await client.getMeta()
 
+// Get metadata with asset contexts
+let metaAndCtxs = try await client.getMetaAndAssetCtxs()
+
 // Get spot market metadata
 let spotMeta = try await client.getSpotMeta()
+
+// Get spot metadata with asset contexts
+let spotMetaAndCtxs = try await client.getSpotMetaAndAssetCtxs()
 
 // Get user state
 let userState = try await client.getUserState()
@@ -215,6 +232,35 @@ let vaultDeposit = try await client.vaultUsdTransfer(
     isDeposit: true,
     usd: 5_000_000 // $5 in micro-USD
 )
+```
+
+### 🔧 Advanced Features
+
+```swift
+// Token delegation to validator
+let delegate = try await client.tokenDelegate(
+    validator: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+    wei: 1000000000000000000, // 1 token in wei
+    isUndelegate: false
+)
+
+// Withdraw from bridge
+let withdraw = try await client.withdrawFromBridge(
+    amount: Decimal(10.0),
+    destination: "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45"
+)
+
+// Convert to multi-signature user
+let convertToMultiSig = try await client.convertToMultiSigUser(
+    authorizedUsers: [
+        "0x742d35Cc6634C0532925a3b8D4C9db96c4b4Db45",
+        "0xa15099a30bbf2e68942d6f4c43d70d04faeab0a0"
+    ],
+    threshold: 2
+)
+
+// Enable big blocks for better performance
+let bigBlocks = try await client.useBigBlocks(enable: true)
 
 // Send asset between DEXs
 let assetTransfer = try await client.sendAsset(
@@ -259,7 +305,53 @@ swift run NewMethodsExample
 
 # Transfer operations (USD, spot tokens, sub accounts)
 swift run TransferExample
+
+# Multi-signature operations
+swift run ConvertToMultiSigExample
+swift run MultiSigOrderExample
+
+# Builder fees and routing
+swift run BuilderFeeExample
+
+# Performance optimization
+swift run UseBigBlocksExample
 ```
+
+### 📋 Example Categories
+
+- **Core Trading**: Basic usage, advanced trading, market orders
+- **Account Management**: Leverage, margin, referrals, sub-accounts
+- **Transfer Operations**: USD, spot tokens, sub-accounts, vault transfers
+- **Advanced Features**: Multi-sig, builder fees, big blocks, token delegation
+- **Real-time Data**: WebSocket subscriptions and market data streaming
+
+Each example corresponds to similar functionality in the Python SDK examples, ensuring consistency across implementations.
+
+## 🧪 Testing
+
+The SDK includes comprehensive tests covering all functionality:
+
+```bash
+# Run all tests
+swift test
+
+# Build only (faster verification)
+swift build
+
+# Run specific test suites
+swift test --filter NewMethodsTests
+swift test --filter HyperliquidClientTests
+```
+
+### Test Coverage
+
+- **Method Signatures**: Verify all methods exist with correct signatures
+- **Parameter Validation**: Test parameter handling and validation
+- **Error Handling**: Ensure proper error propagation
+- **Integration Tests**: Test real API interactions (when configured)
+- **Mock Tests**: Unit tests with mocked responses
+
+The test suite ensures compatibility with the Python SDK and validates all newly implemented methods.
 
 ### Example Output:
 ```

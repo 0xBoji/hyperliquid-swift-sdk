@@ -77,11 +77,37 @@ public actor InfoService: HTTPService {
     /// Get spot metadata
     public func getSpotMeta() async throws -> SpotMeta {
         let payload = ["type": "spotMeta"]
-        
+
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: payload,
             responseType: SpotMeta.self
+        )
+    }
+
+    /// Get metadata and asset contexts
+    public func getMetaAndAssetCtxs() async throws -> JSONResponse {
+        let payload = [
+            "type": "metaAndAssetCtxs"
+        ]
+
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: payload,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Get spot metadata and asset contexts
+    public func getSpotMetaAndAssetCtxs() async throws -> JSONResponse {
+        let payload = [
+            "type": "spotMetaAndAssetCtxs"
+        ]
+
+        return try await httpClient.postAndDecode(
+            path: "/info",
+            payload: payload,
+            responseType: JSONResponse.self
         )
     }
     

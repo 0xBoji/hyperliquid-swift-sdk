@@ -74,6 +74,88 @@ public final class TradingService: Sendable {
         return try await placeOrder(orderData: orderData)
     }
 
+    /// Place a market buy order
+    /// - Parameters:
+    ///   - coin: Asset symbol (e.g., "BTC", "ETH")
+    ///   - sz: Order size
+    ///   - slippage: Maximum slippage tolerance (default 5%)
+    ///   - reduceOnly: Whether this is a reduce-only order
+    /// - Returns: Order response as JSONResponse
+    public func marketBuy(
+        coin: String,
+        sz: Decimal,
+        slippage: Decimal = 0.05,
+        reduceOnly: Bool = false
+    ) async throws -> JSONResponse {
+        // Get current mid price and calculate slippage price
+        let midPrice = try await getCurrentMidPrice(coin: coin)
+        let slippagePrice = midPrice * (1 + slippage)
+
+        let orderData: [String: any Sendable] = [
+            "coin": coin,
+            "is_buy": true,
+            "sz": sz.description,
+            "limit_px": slippagePrice.description,
+            "order_type": ["limit": ["tif": "Ioc"]], // Immediate or Cancel for market orders
+            "reduce_only": reduceOnly
+        ]
+
+        return try await placeOrder(orderData: orderData)
+    }
+
+    /// Place a market sell order
+    /// - Parameters:
+    ///   - coin: Asset symbol (e.g., "BTC", "ETH")
+    ///   - sz: Order size
+    ///   - slippage: Maximum slippage tolerance (default 5%)
+    ///   - reduceOnly: Whether this is a reduce-only order
+    /// - Returns: Order response as JSONResponse
+    public func marketSell(
+        coin: String,
+        sz: Decimal,
+        slippage: Decimal = 0.05,
+        reduceOnly: Bool = false
+    ) async throws -> JSONResponse {
+        // Get current mid price and calculate slippage price
+        let midPrice = try await getCurrentMidPrice(coin: coin)
+        let slippagePrice = midPrice * (1 - slippage)
+
+        let orderData: [String: any Sendable] = [
+            "coin": coin,
+            "is_buy": false,
+            "sz": sz.description,
+            "limit_px": slippagePrice.description,
+            "order_type": ["limit": ["tif": "Ioc"]], // Immediate or Cancel for market orders
+            "reduce_only": reduceOnly
+        ]
+
+        return try await placeOrder(orderData: orderData)
+    }
+
+    // MARK: - Helper Methods
+
+    /// Get current mid price for a coin
+    private func getCurrentMidPrice(coin: String) async throws -> Decimal {
+        let payload = [
+            "type": "allMids"
+        ]
+
+        let response = try await httpClient.postAndDecode(
+            path: "/info",
+            payload: payload,
+            responseType: [String: String].self
+        )
+
+        guard let priceString = response[coin],
+              let price = Decimal(string: priceString) else {
+            throw HyperliquidError.responseParsingFailed("Could not get mid price for \(coin)")
+        }
+
+        return price
+    }
+
+    // MARK: - Order Management Methods
+
     /// Cancel an order
     /// - Parameters:
     ///   - coin: Asset symbol (e.g., "BTC", "ETH")
@@ -88,6 +170,451 @@ public final class TradingService: Sendable {
         ]
 
         return try await performCancel(cancelData: cancelData)
+    }
+
+    /// Place multiple orders in a single request
+    /// - Parameter orders: Array of order requests
+    /// - Returns: Bulk order response as JSONResponse
+    public func bulkOrders(_ orders: [BulkOrderRequest]) async throws -> JSONResponse {
+        var orderWires: [[String: any Sendable]] = []
+
+        for order in orders {
+            let assetId = try await getDynamicAssetId(for: order.coin)
+
+            let orderWire: [String: any Sendable] = [
+                "a": assetId,
+                "b": order.isBuy,
+                "p": order.px.description,
+                "s": order.sz.description,
+                "r": order.reduceOnly,
+                "t": ["limit": ["tif": "Gtc"]]
+            ]
+
+            orderWires.append(orderWire)
+        }
+
+        let orderAction: [String: any Sendable] = [
+            "type": "order",
+            "orders": orderWires,
+            "grouping": "na"
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: orderAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Cancel all orders for a specific coin
+    /// - Parameter coin: Asset symbol to cancel orders for
+    /// - Returns: Cancel response as JSONResponse
+    public func cancelAllOrders(coin: String) async throws -> JSONResponse {
+        let assetId = try await getDynamicAssetId(for: coin)
+
+        let cancelAction: [String: any Sendable] = [
+            "type": "cancel",
+            "cancels": [["a": assetId, "o": "all"]]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: cancelAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Cancel all orders across all coins
+    /// - Returns: Cancel response as JSONResponse
+    public func cancelAllOrders() async throws -> JSONResponse {
+        let cancelAction: [String: any Sendable] = [
+            "type": "cancel",
+            "cancels": [["a": "all", "o": "all"]]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: cancelAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Modify an existing order
+    /// - Parameters:
+    ///   - oid: Order ID to modify
+    ///   - coin: Asset symbol
+    ///   - newPrice: New limit price
+    ///   - newSize: New order size
+    /// - Returns: Modify response as JSONResponse
+    public func modifyOrder(oid: UInt64, coin: String, newPrice: Decimal, newSize: Decimal) async throws -> JSONResponse {
+        let assetId = try await getDynamicAssetId(for: coin)
+
+        let orderWire: [String: any Sendable] = [
+            "a": assetId,
+            "b": true, // This will be determined by the existing order
+            "p": newPrice.description,
+            "s": newSize.description,
+            "r": false,
+            "t": ["limit": ["tif": "Gtc"]]
+        ]
+
+        let modifyWire: [String: any Sendable] = [
+            "oid": oid,
+            "order": orderWire
+        ]
+
+        let modifyAction: [String: any Sendable] = [
+            "type": "batchModify",
+            "modifies": [modifyWire]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: modifyAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Modify multiple orders in a single request
+    /// - Parameter modifies: Array of modify requests
+    /// - Returns: Bulk modify response as JSONResponse
+    public func bulkModifyOrders(_ modifies: [ModifyRequest]) async throws -> JSONResponse {
+        var modifyWires: [[String: any Sendable]] = []
+
+        for modify in modifies {
+            let assetId = try await getDynamicAssetId(for: modify.order.coin)
+
+            let orderWire: [String: any Sendable] = [
+                "a": assetId,
+                "b": modify.order.isBuy,
+                "p": modify.order.px.description,
+                "s": modify.order.sz.description,
+                "r": modify.order.reduceOnly,
+                "t": ["limit": ["tif": "Gtc"]]
+            ]
+
+            var modifyWire: [String: any Sendable] = [
+                "order": orderWire
+            ]
+
+            if let oid = modify.oid {
+                modifyWire["oid"] = oid
+            } else if let cloid = modify.cloid {
+                modifyWire["cloid"] = cloid
+            }
+
+            modifyWires.append(modifyWire)
+        }
+
+        let modifyAction: [String: any Sendable] = [
+            "type": "batchModify",
+            "modifies": modifyWires
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: modifyAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Cancel order by client order ID
+    /// - Parameters:
+    ///   - coin: Asset symbol
+    ///   - cloid: Client order ID
+    /// - Returns: Cancel response as JSONResponse
+    public func cancelOrderByCloid(coin: String, cloid: String) async throws -> JSONResponse {
+        let assetId = try await getDynamicAssetId(for: coin)
+
+        let cancelData: [String: any Sendable] = [
+            "a": assetId,
+            "o": cloid
+        ]
+
+        let cancelAction: [String: any Sendable] = [
+            "type": "cancel",
+            "cancels": [cancelData]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: cancelAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Schedule cancellation of all orders at a specific time
+    /// - Parameter time: Timestamp in milliseconds (nil for immediate cancel)
+    /// - Returns: Schedule cancel response as JSONResponse
+    public func scheduleCancel(time: Int64?) async throws -> JSONResponse {
+        let scheduleAction: [String: any Sendable] = [
+            "type": "scheduleCancel",
+            "time": time as Any
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: scheduleAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Account Management Methods
+
+    /// Update leverage for a specific asset
+    /// - Parameters:
+    ///   - coin: Asset symbol
+    ///   - leverage: New leverage value
+    ///   - isCross: Whether to use cross margin (default: true)
+    /// - Returns: Update leverage response as JSONResponse
+    public func updateLeverage(coin: String, leverage: Int, isCross: Bool = true) async throws -> JSONResponse {
+        let assetId = try await getDynamicAssetId(for: coin)
+
+        let leverageAction: [String: any Sendable] = [
+            "type": "updateLeverage",
+            "asset": assetId,
+            "isCross": isCross,
+            "leverage": leverage
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: leverageAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Update isolated margin for a specific asset
+    /// - Parameters:
+    ///   - coin: Asset symbol
+    ///   - amountUsd: Amount in USD to add/remove from isolated margin
+    ///   - isBuy: Whether this is for a buy position (default: true)
+    /// - Returns: Update isolated margin response as JSONResponse
+    public func updateIsolatedMargin(coin: String, amountUsd: Decimal, isBuy: Bool = true) async throws -> JSONResponse {
+        let assetId = try await getDynamicAssetId(for: coin)
+
+        let marginAction: [String: any Sendable] = [
+            "type": "updateIsolatedMargin",
+            "asset": assetId,
+            "isBuy": isBuy,
+            "ntli": NSDecimalNumber(decimal: amountUsd * 1000000).intValue // Convert to micro-USD
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: marginAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Set referrer code
+    /// - Parameter code: Referrer code
+    /// - Returns: Set referrer response as JSONResponse
+    public func setReferrer(code: String) async throws -> JSONResponse {
+        let referrerAction: [String: any Sendable] = [
+            "type": "setReferrer",
+            "code": code
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: referrerAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Create a sub-account
+    /// - Parameter name: Name for the sub-account
+    /// - Returns: Create sub-account response as JSONResponse
+    public func createSubAccount(name: String) async throws -> JSONResponse {
+        let subAccountAction: [String: any Sendable] = [
+            "type": "createSubAccount",
+            "name": name
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: subAccountAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Advanced Features
+
+    /// Delegate tokens to a validator
+    /// - Parameters:
+    ///   - validator: Validator address
+    ///   - wei: Amount in wei to delegate
+    ///   - isUndelegate: Whether this is an undelegation (default: false)
+    /// - Returns: Token delegate response as JSONResponse
+    public func tokenDelegate(validator: String, wei: Int, isUndelegate: Bool = false) async throws -> JSONResponse {
+        let delegateAction: [String: any Sendable] = [
+            "type": "tokenDelegate",
+            "validator": validator,
+            "wei": wei,
+            "isUndelegate": isUndelegate
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createUserSignedRequest(action: delegateAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Withdraw from bridge
+    /// - Parameters:
+    ///   - amount: Amount to withdraw
+    ///   - destination: Destination address
+    /// - Returns: Withdraw response as JSONResponse
+    public func withdrawFromBridge(amount: Decimal, destination: String) async throws -> JSONResponse {
+        let withdrawAction: [String: any Sendable] = [
+            "type": "withdrawFromBridge",
+            "amount": amount.description,
+            "destination": destination
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createUserSignedRequest(action: withdrawAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Approve builder fee
+    /// - Parameters:
+    ///   - builder: Builder address
+    ///   - maxFeeRate: Maximum fee rate
+    /// - Returns: Approve builder fee response as JSONResponse
+    public func approveBuilderFee(builder: String, maxFeeRate: String) async throws -> JSONResponse {
+        let approveAction: [String: any Sendable] = [
+            "type": "approveBuilderFee",
+            "builder": builder,
+            "maxFeeRate": maxFeeRate
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: approveAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Convert account to multi-signature user
+    /// - Parameters:
+    ///   - authorizedUsers: Array of authorized user addresses
+    ///   - threshold: Number of signatures required
+    /// - Returns: Convert to multi-sig response as JSONResponse
+    public func convertToMultiSigUser(authorizedUsers: [String], threshold: Int) async throws -> JSONResponse {
+        let convertAction: [String: any Sendable] = [
+            "type": "convertToMultiSigUser",
+            "authorizedUsers": authorizedUsers,
+            "threshold": threshold
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: convertAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Execute multi-signature operation
+    /// - Parameters:
+    ///   - multiSigUser: Multi-sig user address
+    ///   - innerAction: The action to execute
+    ///   - signatures: Array of signatures
+    ///   - nonce: Nonce for the operation
+    ///   - vaultAddress: Optional vault address
+    /// - Returns: Multi-sig operation response as JSONResponse
+    public func multiSig(
+        multiSigUser: String,
+        innerAction: [String: any Sendable],
+        signatures: [String],
+        nonce: Int64,
+        vaultAddress: String? = nil
+    ) async throws -> JSONResponse {
+        let multiSigAction: [String: any Sendable] = [
+            "type": "multiSig",
+            "multiSigUser": multiSigUser.lowercased(),
+            "innerAction": innerAction,
+            "signatures": signatures,
+            "nonce": nonce,
+            "vaultAddress": vaultAddress as Any
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: multiSigAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Enable or disable big blocks
+    /// - Parameter enable: Whether to enable big blocks
+    /// - Returns: Use big blocks response as JSONResponse
+    public func useBigBlocks(enable: Bool) async throws -> JSONResponse {
+        let bigBlocksAction: [String: any Sendable] = [
+            "type": "useBigBlocks",
+            "enable": enable
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: bigBlocksAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
     }
 
     // MARK: - Private Implementation
@@ -274,39 +801,7 @@ public final class TradingService: Sendable {
         )
     }
 
-    // Modify an existing order
-    func modifyOrder(oid: UInt64, coin: String, newPrice: Decimal, newSize: Decimal) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
 
-        // Get asset ID for the coin
-        let assetId = try await getAssetId(for: coin)
-
-        // Create modify request
-        let modifyRequest: [String: any Sendable] = [
-            "oid": oid,
-            "order": [
-                "a": assetId,
-                "b": true, // This should be determined from original order, but simplified for now
-                "p": floatToWire(newPrice),
-                "s": floatToWire(newSize),
-                "r": false,
-                "t": ["limit": ["tif": "Gtc"]]
-            ] as [String: any Sendable]
-        ]
-
-        let action: [String: any Sendable] = [
-            "type": "modify",
-            "modifies": [modifyRequest]
-        ]
-
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
 
     // Place a market order
     func marketOrder(coin: String, isBuy: Bool, sz: Decimal, reduceOnly: Bool) async throws -> JSONResponse {
@@ -340,190 +835,16 @@ public final class TradingService: Sendable {
         )
     }
 
-    // Batch modify orders (Python: bulk_modify_orders_new)
-    func bulkModifyOrders(_ modifies: [ModifyRequest]) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        var modifyWires: [[String: any Sendable]] = []
-        for m in modifies {
-            let assetId = try await getAssetId(for: m.order.coin)
-            let orderWire: [String: any Sendable] = [
-                "a": assetId,
-                "b": m.order.isBuy,
-                "p": m.order.orderType == .market ? "@0" : floatToWire(m.order.px),
-                "s": floatToWire(m.order.sz),
-                "r": m.order.reduceOnly,
-                "t": m.order.orderType == .market ? ["market": [:] as [String: any Sendable]] : ["limit": ["tif": "Gtc"] as [String: any Sendable]]
-            ]
-            var modify: [String: any Sendable] = ["order": orderWire]
-            if let oid = m.oid { modify["oid"] = oid }
-            if let cloid = m.cloid { modify["oid"] = cloid } // API uses same field key
-            modifyWires.append(modify)
-        }
-        let action: [String: any Sendable] = [
-            "type": "batchModify",
-            "modifies": modifyWires
-        ]
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
-
-    // Update leverage (Python: update_leverage)
-    func updateLeverage(coin: String, leverage: Int, isCross: Bool = true) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        let assetId = try await getAssetId(for: coin)
-        let action: [String: any Sendable] = [
-            "type": "updateLeverage",
-            "asset": assetId,
-            "isCross": isCross,
-            "leverage": leverage
-        ]
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
-
-    // Update isolated margin (Python: update_isolated_margin)
-    func updateIsolatedMargin(coin: String, amountUsd: Decimal, isBuy: Bool = true) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        let assetId = try await getAssetId(for: coin)
-        // Convert USD decimal to integer cents-like format string similar to float_to_usd_int
-        // Hyperliquid expects integer ntli units; we'll scale by 1e6 which is typical for USD int
-        let scaled = (amountUsd as NSDecimalNumber).multiplying(by: NSDecimalNumber(mantissa: 1, exponent: 6, isNegative: false))
-        let action: [String: any Sendable] = [
-            "type": "updateIsolatedMargin",
-            "asset": assetId,
-            "isBuy": isBuy,
-            "ntli": scaled.stringValue
-        ]
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
-
-    // Set referrer code (Python: set_referrer)
-    func setReferrer(code: String) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        let action: [String: any Sendable] = [
-            "type": "setReferrer",
-            "code": code
-        ]
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
-
-    // Create Sub Account (Python: create_sub_account)
-    func createSubAccount(name: String) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-        let action: [String: any Sendable] = [
-            "type": "createSubAccount",
-            "name": name
-        ]
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
 
 
 
-    // Place multiple orders in a single request (bulk orders)
-    func bulkOrders(_ orders: [BulkOrderRequest]) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
 
-        // Convert bulk order requests to order wires
-        var orderWires: [[String: any Sendable]] = []
 
-        for order in orders {
-            let assetId = try await getAssetId(for: order.coin)
 
-            let orderWire: [String: any Sendable] = [
-                "a": assetId,
-                "b": order.isBuy,
-                "p": order.orderType == .market ? "@0" : floatToWire(order.px),
-                "s": floatToWire(order.sz),
-                "r": order.reduceOnly,
-                "t": order.orderType == .market ?
-                    ["market": [:] as [String: any Sendable]] :
-                    ["limit": ["tif": "Gtc"] as [String: any Sendable]]
-            ]
 
-            orderWires.append(orderWire)
-        }
 
-        let action: [String: any Sendable] = [
-            "type": "order",
-            "orders": orderWires,
-            "grouping": "na"
-        ]
 
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
 
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
-
-    // Cancel order by client order ID
-    func cancelOrderByCloid(coin: String, cloid: String) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-
-        // Get asset ID for the coin
-        let assetId = try await getAssetId(for: coin)
-
-        let cancelRequest: [String: any Sendable] = [
-            "a": assetId,
-            "o": cloid  // Use cloid directly as string
-        ]
-
-        let action: [String: any Sendable] = [
-            "type": "cancel",
-            "cancels": [cancelRequest]
-        ]
-
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
-
-    // Schedule cancellation of all orders at a specific time
-    func scheduleCancel(time: Int64?) async throws -> JSONResponse {
-        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
-
-        let action: [String: any Sendable] = [
-            "type": "scheduleCancel",
-            "time": time ?? NSNull()  // null for immediate cancel, timestamp for scheduled
-        ]
-
-        let request = try await createSignedRequest(action: action, timestamp: timestamp)
-
-        return try await httpClient.postAndDecode(
-            path: "/exchange",
-            payload: request,
-            responseType: JSONResponse.self
-        )
-    }
 
     // Helper method to create empty success response
     func createEmptyResponse() async throws -> JSONResponse {

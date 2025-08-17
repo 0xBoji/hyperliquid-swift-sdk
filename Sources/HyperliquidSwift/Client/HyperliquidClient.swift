@@ -75,6 +75,16 @@ public actor HyperliquidClient {
         return try await infoService.getSpotMeta()
     }
 
+    /// Get metadata and asset contexts
+    public func getMetaAndAssetCtxs() async throws -> JSONResponse {
+        return try await infoService.getMetaAndAssetCtxs()
+    }
+
+    /// Get spot metadata and asset contexts
+    public func getSpotMetaAndAssetCtxs() async throws -> JSONResponse {
+        return try await infoService.getSpotMetaAndAssetCtxs()
+    }
+
     // MARK: - Account Information Methods
 
     /// Get user state for the authenticated user
@@ -682,6 +692,72 @@ extension HyperliquidClient {
             throw HyperliquidError.clientNotInitialized
         }
         return try await tradingService.approveAgent(agentAddress: agentAddress, agentName: agentName)
+    }
+
+    // MARK: - New Core Trading Methods
+
+    /// Place a market buy order
+    public func marketBuy(coin: String, sz: Decimal, slippage: Decimal = 0.05, reduceOnly: Bool = false) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.marketBuy(coin: coin, sz: sz, slippage: slippage, reduceOnly: reduceOnly)
+    }
+
+    /// Place a market sell order
+    public func marketSell(coin: String, sz: Decimal, slippage: Decimal = 0.05, reduceOnly: Bool = false) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.marketSell(coin: coin, sz: sz, slippage: slippage, reduceOnly: reduceOnly)
+    }
+
+
+
+    // MARK: - Advanced Features
+
+    /// Delegate tokens to validator
+    public func tokenDelegate(validator: String, wei: Int, isUndelegate: Bool = false) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.tokenDelegate(validator: validator, wei: wei, isUndelegate: isUndelegate)
+    }
+
+    /// Withdraw from bridge
+    public func withdrawFromBridge(amount: Decimal, destination: String) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.withdrawFromBridge(amount: amount, destination: destination)
+    }
+
+    /// Approve builder fee
+    public func approveBuilderFee(builder: String, maxFeeRate: String) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.approveBuilderFee(builder: builder, maxFeeRate: maxFeeRate)
+    }
+
+    /// Convert account to multi-signature user
+    public func convertToMultiSigUser(authorizedUsers: [String], threshold: Int) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.convertToMultiSigUser(authorizedUsers: authorizedUsers, threshold: threshold)
+    }
+
+    /// Execute multi-signature operation
+    public func multiSig(
+        multiSigUser: String,
+        innerAction: [String: any Sendable],
+        signatures: [String],
+        nonce: Int64,
+        vaultAddress: String? = nil
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.multiSig(
+            multiSigUser: multiSigUser,
+            innerAction: innerAction,
+            signatures: signatures,
+            nonce: nonce,
+            vaultAddress: vaultAddress
+        )
+    }
+
+    /// Enable or disable big blocks
+    public func useBigBlocks(enable: Bool) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.useBigBlocks(enable: enable)
     }
 
 }
