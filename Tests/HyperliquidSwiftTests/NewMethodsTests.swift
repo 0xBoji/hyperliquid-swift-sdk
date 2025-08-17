@@ -232,6 +232,61 @@ final class NewMethodsTests: XCTestCase {
             try await self.client.unregisterValidator()
         }
     }
+
+    // MARK: - New Methods Tests (Batch 3)
+
+    func testChangeValidatorProfileMethodSignature() async throws {
+        // Test that changeValidatorProfile method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.changeValidatorProfile(
+                nodeIp: "192.168.1.100",
+                name: "TestValidator",
+                description: "Test description",
+                discordUsername: "test#1234",
+                commissionRate: "0.05"
+            )
+        }
+    }
+
+    func testCSignerUnjailSelfMethodSignature() async throws {
+        // Test that cSignerUnjailSelf method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.cSignerUnjailSelf()
+        }
+    }
+
+    func testCSignerJailSelfMethodSignature() async throws {
+        // Test that cSignerJailSelf method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.cSignerJailSelf()
+        }
+    }
+
+    func testSpotDeployRegisterTokenMethodSignature() async throws {
+        // Test that spotDeployRegisterToken method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployRegisterToken(
+                tokenName: "TESTTOKEN",
+                szDecimals: 6,
+                weiDecimals: 18,
+                maxGas: 1000000,
+                fullName: "Test Token"
+            )
+        }
+    }
+
+    func testPerpDeployRegisterAssetMethodSignature() async throws {
+        // Test that perpDeployRegisterAsset method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.perpDeployRegisterAsset(
+                dex: "testdex",
+                name: "TESTPERP",
+                szDecimals: 4,
+                maxLeverage: 20,
+                onlyIsolated: false
+            )
+        }
+    }
     
     // MARK: - Parameter Validation Tests
     

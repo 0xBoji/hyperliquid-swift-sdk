@@ -808,6 +808,161 @@ public final class TradingService: Sendable {
         )
     }
 
+    /// Change validator profile
+    /// - Parameters:
+    ///   - nodeIp: New IP address (nil to keep current)
+    ///   - name: New name (nil to keep current)
+    ///   - description: New description (nil to keep current)
+    ///   - discordUsername: New Discord username (nil to keep current)
+    ///   - commissionRate: New commission rate (nil to keep current)
+    /// - Returns: Validator profile change response as JSONResponse
+    public func changeValidatorProfile(
+        nodeIp: String? = nil,
+        name: String? = nil,
+        description: String? = nil,
+        discordUsername: String? = nil,
+        commissionRate: String? = nil
+    ) async throws -> JSONResponse {
+        var changeProfile: [String: any Sendable] = [:]
+
+        if let nodeIp = nodeIp { changeProfile["nodeIp"] = nodeIp }
+        if let name = name { changeProfile["name"] = name }
+        if let description = description { changeProfile["description"] = description }
+        if let discordUsername = discordUsername { changeProfile["discordUsername"] = discordUsername }
+        if let commissionRate = commissionRate { changeProfile["commissionRate"] = commissionRate }
+
+        let validatorAction: [String: any Sendable] = [
+            "type": "CValidatorAction",
+            "cValidatorAction": [
+                "changeProfile": changeProfile
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: validatorAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - C-Signer Operations
+
+    /// Unjail self as a signer
+    /// - Returns: Unjail response as JSONResponse
+    public func cSignerUnjailSelf() async throws -> JSONResponse {
+        return try await cSignerInner(variant: "unjailSelf")
+    }
+
+    /// Jail self as a signer
+    /// - Returns: Jail response as JSONResponse
+    public func cSignerJailSelf() async throws -> JSONResponse {
+        return try await cSignerInner(variant: "jailSelf")
+    }
+
+    /// Internal method for C-Signer operations
+    /// - Parameter variant: The signer operation variant
+    /// - Returns: Signer operation response as JSONResponse
+    private func cSignerInner(variant: String) async throws -> JSONResponse {
+        let signerAction: [String: any Sendable] = [
+            "type": "CSignerAction",
+            "cSignerAction": [
+                variant: [:] as [String: String]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: signerAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Spot Deployment Operations
+
+    /// Register a new spot token
+    /// - Parameters:
+    ///   - tokenName: Name of the token
+    ///   - szDecimals: Size decimals for the token
+    ///   - weiDecimals: Wei decimals for the token
+    ///   - maxGas: Maximum gas for operations
+    ///   - fullName: Full name of the token
+    /// - Returns: Spot token registration response as JSONResponse
+    public func spotDeployRegisterToken(
+        tokenName: String,
+        szDecimals: Int,
+        weiDecimals: Int,
+        maxGas: Int,
+        fullName: String
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "registerToken": [
+                    "name": tokenName,
+                    "szDecimals": szDecimals,
+                    "weiDecimals": weiDecimals,
+                    "maxGas": maxGas,
+                    "fullName": fullName
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Perpetual Deployment Operations
+
+    /// Register a new perpetual asset
+    /// - Parameters:
+    ///   - dex: DEX identifier
+    ///   - name: Asset name
+    ///   - szDecimals: Size decimals
+    ///   - maxLeverage: Maximum leverage allowed
+    ///   - onlyIsolated: Whether only isolated margin is allowed
+    /// - Returns: Perpetual asset registration response as JSONResponse
+    public func perpDeployRegisterAsset(
+        dex: String,
+        name: String,
+        szDecimals: Int,
+        maxLeverage: Int,
+        onlyIsolated: Bool
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "perpDeploy",
+            "perpDeploy": [
+                "registerAsset": [
+                    "dex": dex,
+                    "name": name,
+                    "szDecimals": szDecimals,
+                    "maxLeverage": maxLeverage,
+                    "onlyIsolated": onlyIsolated
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
     // MARK: - Private Implementation
 
     private func placeOrder(orderData: [String: any Sendable]) async throws -> JSONResponse {

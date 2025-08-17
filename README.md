@@ -324,6 +324,12 @@ swift run TPSLOrdersExample
 
 # Bulk cancellation and order expiration
 swift run BulkCancelExample
+
+# Validator management operations
+swift run ValidatorManagementExample
+
+# Token and asset deployment
+swift run DeploymentExample
 ```
 
 ### 📋 Example Categories
@@ -333,7 +339,8 @@ swift run BulkCancelExample
 - **Transfer Operations**: USD, spot tokens, sub-accounts, vault transfers
 - **Advanced Features**: Multi-sig, builder fees, big blocks, token delegation
 - **Order Management**: Bulk cancellation, order expiration, advanced cancellation
-- **Validator Operations**: Validator registration and management
+- **Validator Operations**: Validator registration, profile management, signer operations
+- **Deployment Operations**: Spot token and perpetual asset deployment
 - **Real-time Data**: WebSocket subscriptions and market data streaming
 
 Each example corresponds to similar functionality in the Python SDK examples, ensuring consistency across implementations.

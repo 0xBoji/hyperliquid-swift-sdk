@@ -840,4 +840,70 @@ extension HyperliquidClient {
         return try await tradingService.unregisterValidator()
     }
 
+    /// Change validator profile
+    public func changeValidatorProfile(
+        nodeIp: String? = nil,
+        name: String? = nil,
+        description: String? = nil,
+        discordUsername: String? = nil,
+        commissionRate: String? = nil
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.changeValidatorProfile(
+            nodeIp: nodeIp,
+            name: name,
+            description: description,
+            discordUsername: discordUsername,
+            commissionRate: commissionRate
+        )
+    }
+
+    /// Unjail self as a signer
+    public func cSignerUnjailSelf() async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.cSignerUnjailSelf()
+    }
+
+    /// Jail self as a signer
+    public func cSignerJailSelf() async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.cSignerJailSelf()
+    }
+
+    /// Register a new spot token
+    public func spotDeployRegisterToken(
+        tokenName: String,
+        szDecimals: Int,
+        weiDecimals: Int,
+        maxGas: Int,
+        fullName: String
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployRegisterToken(
+            tokenName: tokenName,
+            szDecimals: szDecimals,
+            weiDecimals: weiDecimals,
+            maxGas: maxGas,
+            fullName: fullName
+        )
+    }
+
+    /// Register a new perpetual asset
+    public func perpDeployRegisterAsset(
+        dex: String,
+        name: String,
+        szDecimals: Int,
+        maxLeverage: Int,
+        onlyIsolated: Bool
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.perpDeployRegisterAsset(
+            dex: dex,
+            name: name,
+            szDecimals: szDecimals,
+            maxLeverage: maxLeverage,
+            onlyIsolated: onlyIsolated
+        )
+    }
+
 }
