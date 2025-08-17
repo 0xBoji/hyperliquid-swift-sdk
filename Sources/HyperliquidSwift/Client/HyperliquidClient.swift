@@ -906,4 +906,64 @@ extension HyperliquidClient {
         )
     }
 
+    /// Approve an agent wallet
+    public func approveAgent(agentName: String? = nil) async throws -> (response: JSONResponse, agentKey: String) {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.approveAgent(agentName: agentName)
+    }
+
+    /// Genesis deployment for spot token
+    public func spotDeployGenesis(
+        token: Int,
+        maxSupply: String,
+        noHyperliquidity: Bool
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployGenesis(
+            token: token,
+            maxSupply: maxSupply,
+            noHyperliquidity: noHyperliquidity
+        )
+    }
+
+    /// Register a spot trading pair
+    public func spotDeployRegisterSpot(
+        baseToken: Int,
+        quoteToken: Int
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployRegisterSpot(
+            baseToken: baseToken,
+            quoteToken: quoteToken
+        )
+    }
+
+    /// User genesis for spot deployment
+    public func spotDeployUserGenesis(
+        token: Int,
+        userAndWei: [(String, String)],
+        existingTokenAndWei: [(Int, String)]
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployUserGenesis(
+            token: token,
+            userAndWei: userAndWei,
+            existingTokenAndWei: existingTokenAndWei
+        )
+    }
+
+    /// Set oracle for perpetual deployment
+    public func perpDeploySetOracle(
+        dex: String,
+        oraclePrices: [String: String],
+        maxGas: Int? = nil
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.perpDeploySetOracle(
+            dex: dex,
+            oraclePrices: oraclePrices,
+            maxGas: maxGas
+        )
+    }
+
 }

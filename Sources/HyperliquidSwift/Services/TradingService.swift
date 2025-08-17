@@ -963,6 +963,181 @@ public final class TradingService: Sendable {
         )
     }
 
+    // MARK: - Agent Operations
+
+    /// Approve an agent wallet
+    /// - Parameter agentName: Optional name for the agent
+    /// - Returns: Tuple containing the approval response and the agent private key
+    public func approveAgent(agentName: String? = nil) async throws -> (response: JSONResponse, agentKey: String) {
+        // Generate a new private key for the agent (32 random bytes as hex)
+        let agentKey = generateRandomPrivateKey()
+        let agentPrivateKey = try PrivateKey(hex: agentKey)
+        let agentAddress = agentPrivateKey.walletAddress
+
+        let approveAction: [String: any Sendable] = [
+            "type": "approveAgent",
+            "agentAddress": agentAddress,
+            "agentName": agentName as Any
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: approveAction, timestamp: timestamp)
+
+        let response = try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+
+        return (response: response, agentKey: agentKey)
+    }
+
+    /// Generate a random private key
+    /// - Returns: 32-byte private key as hex string
+    private func generateRandomPrivateKey() -> String {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        let result = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        guard result == errSecSuccess else {
+            // Fallback to a deterministic but random-looking key
+            return "0x" + String(repeating: "0123456789abcdef", count: 4)
+        }
+        return "0x" + bytes.map { String(format: "%02x", $0) }.joined()
+    }
+
+    // MARK: - Advanced Spot Deployment Operations
+
+    /// Genesis deployment for spot token
+    /// - Parameters:
+    ///   - token: Token ID
+    ///   - maxSupply: Maximum supply as string
+    ///   - noHyperliquidity: Whether to disable hyperliquidity
+    /// - Returns: Spot genesis deployment response as JSONResponse
+    public func spotDeployGenesis(
+        token: Int,
+        maxSupply: String,
+        noHyperliquidity: Bool
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "genesis": [
+                    "token": token,
+                    "maxSupply": maxSupply,
+                    "noHyperliquidity": noHyperliquidity
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Register a spot trading pair
+    /// - Parameters:
+    ///   - baseToken: Base token ID
+    ///   - quoteToken: Quote token ID
+    /// - Returns: Spot pair registration response as JSONResponse
+    public func spotDeployRegisterSpot(
+        baseToken: Int,
+        quoteToken: Int
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "registerSpot": [
+                    "baseToken": baseToken,
+                    "quoteToken": quoteToken
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// User genesis for spot deployment
+    /// - Parameters:
+    ///   - token: Token ID
+    ///   - userAndWei: Array of tuples containing user addresses and wei amounts
+    ///   - existingTokenAndWei: Array of tuples containing existing token IDs and wei amounts
+    /// - Returns: User genesis deployment response as JSONResponse
+    public func spotDeployUserGenesis(
+        token: Int,
+        userAndWei: [(String, String)],
+        existingTokenAndWei: [(Int, String)]
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "userGenesis": [
+                    "token": token,
+                    "userAndWei": userAndWei.map { [$0.0, $0.1] },
+                    "existingTokenAndWei": existingTokenAndWei.map { [$0.0, $0.1] }
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Advanced Perpetual Deployment Operations
+
+    /// Set oracle for perpetual deployment
+    /// - Parameters:
+    ///   - dex: DEX identifier
+    ///   - oraclePrices: Dictionary of oracle prices
+    ///   - maxGas: Maximum gas for operations
+    /// - Returns: Oracle set response as JSONResponse
+    public func perpDeploySetOracle(
+        dex: String,
+        oraclePrices: [String: String],
+        maxGas: Int? = nil
+    ) async throws -> JSONResponse {
+        var setOracle: [String: any Sendable] = [
+            "dex": dex,
+            "oraclePxs": oraclePrices
+        ]
+
+        if let maxGas = maxGas {
+            setOracle["maxGas"] = maxGas
+        }
+
+        let deployAction: [String: any Sendable] = [
+            "type": "perpDeploy",
+            "perpDeploy": [
+                "setOracle": setOracle
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
     // MARK: - Private Implementation
 
     private func placeOrder(orderData: [String: any Sendable]) async throws -> JSONResponse {

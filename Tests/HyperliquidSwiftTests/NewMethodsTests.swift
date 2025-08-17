@@ -287,6 +287,58 @@ final class NewMethodsTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - New Methods Tests (Batch 4 - Final)
+
+    func testApproveAgentMethodSignature() async throws {
+        // Test that approveAgent method exists with correct signature
+        let _: () async throws -> (response: JSONResponse, agentKey: String) = {
+            try await self.client.approveAgent(agentName: "TestAgent")
+        }
+    }
+
+    func testSpotDeployGenesisMethodSignature() async throws {
+        // Test that spotDeployGenesis method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployGenesis(
+                token: 12345,
+                maxSupply: "1000000000000000000000000",
+                noHyperliquidity: false
+            )
+        }
+    }
+
+    func testSpotDeployRegisterSpotMethodSignature() async throws {
+        // Test that spotDeployRegisterSpot method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployRegisterSpot(
+                baseToken: 12345,
+                quoteToken: 0
+            )
+        }
+    }
+
+    func testSpotDeployUserGenesisMethodSignature() async throws {
+        // Test that spotDeployUserGenesis method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployUserGenesis(
+                token: 12345,
+                userAndWei: [("0x1234567890123456789012345678901234567890", "100000000000000000000")],
+                existingTokenAndWei: [(0, "1000000000")]
+            )
+        }
+    }
+
+    func testPerpDeploySetOracleMethodSignature() async throws {
+        // Test that perpDeploySetOracle method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.perpDeploySetOracle(
+                dex: "testdex",
+                oraclePrices: ["BTC": "45000000000", "ETH": "3000000000"],
+                maxGas: 2000000
+            )
+        }
+    }
     
     // MARK: - Parameter Validation Tests
     

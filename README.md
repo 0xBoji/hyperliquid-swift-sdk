@@ -330,6 +330,12 @@ swift run ValidatorManagementExample
 
 # Token and asset deployment
 swift run DeploymentExample
+
+# Agent wallet management
+swift run AgentManagementExample
+
+# Advanced deployment operations
+swift run AdvancedDeploymentExample
 ```
 
 ### 📋 Example Categories
@@ -340,7 +346,8 @@ swift run DeploymentExample
 - **Advanced Features**: Multi-sig, builder fees, big blocks, token delegation
 - **Order Management**: Bulk cancellation, order expiration, advanced cancellation
 - **Validator Operations**: Validator registration, profile management, signer operations
-- **Deployment Operations**: Spot token and perpetual asset deployment
+- **Deployment Operations**: Spot token and perpetual asset deployment, genesis operations
+- **Agent Management**: Agent wallet creation and approval for automated trading
 - **Real-time Data**: WebSocket subscriptions and market data streaming
 
 Each example corresponds to similar functionality in the Python SDK examples, ensuring consistency across implementations.
