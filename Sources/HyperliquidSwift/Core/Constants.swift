@@ -5,7 +5,7 @@ public enum Constants {
     
     // MARK: - SDK Info
     public static let sdkName = "HyperliquidSwift"
-    public static let sdkVersion = "1.5.0"
+    public static let sdkVersion = "1.6.0"
     public static let userAgent = "\(sdkName)/\(sdkVersion)"
     
     // MARK: - API Endpoints
