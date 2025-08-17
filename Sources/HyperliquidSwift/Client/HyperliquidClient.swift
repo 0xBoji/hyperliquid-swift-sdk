@@ -966,4 +966,60 @@ extension HyperliquidClient {
         )
     }
 
+    /// Enable freeze privilege for a spot token
+    public func spotDeployEnableFreezePrivilege(token: Int) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployEnableFreezePrivilege(token: token)
+    }
+
+    /// Freeze or unfreeze a user for a spot token
+    public func spotDeployFreezeUser(
+        token: Int,
+        user: String,
+        freeze: Bool
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployFreezeUser(
+            token: token,
+            user: user,
+            freeze: freeze
+        )
+    }
+
+    /// Revoke freeze privilege for a spot token
+    public func spotDeployRevokeFreezePrivilege(token: Int) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployRevokeFreezePrivilege(token: token)
+    }
+
+    /// Register hyperliquidity for a spot token
+    public func spotDeployRegisterHyperliquidity(
+        spot: Int,
+        startPx: Double,
+        orderSz: Double,
+        nOrders: Int,
+        nSeededLevels: Int? = nil
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeployRegisterHyperliquidity(
+            spot: spot,
+            startPx: startPx,
+            orderSz: orderSz,
+            nOrders: nOrders,
+            nSeededLevels: nSeededLevels
+        )
+    }
+
+    /// Set deployer trading fee share for a spot token
+    public func spotDeploySetDeployerTradingFeeShare(
+        token: Int,
+        share: String
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.spotDeploySetDeployerTradingFeeShare(
+            token: token,
+            share: share
+        )
+    }
+
 }

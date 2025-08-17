@@ -339,6 +339,56 @@ final class NewMethodsTests: XCTestCase {
             )
         }
     }
+
+    // MARK: - New Methods Tests (Batch 5 - Advanced Spot Operations)
+
+    func testSpotDeployEnableFreezePrivilegeMethodSignature() async throws {
+        // Test that spotDeployEnableFreezePrivilege method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployEnableFreezePrivilege(token: 12345)
+        }
+    }
+
+    func testSpotDeployFreezeUserMethodSignature() async throws {
+        // Test that spotDeployFreezeUser method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployFreezeUser(
+                token: 12345,
+                user: "0x1234567890123456789012345678901234567890",
+                freeze: true
+            )
+        }
+    }
+
+    func testSpotDeployRevokeFreezePrivilegeMethodSignature() async throws {
+        // Test that spotDeployRevokeFreezePrivilege method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployRevokeFreezePrivilege(token: 12345)
+        }
+    }
+
+    func testSpotDeployRegisterHyperliquidityMethodSignature() async throws {
+        // Test that spotDeployRegisterHyperliquidity method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeployRegisterHyperliquidity(
+                spot: 67890,
+                startPx: 1.0,
+                orderSz: 1000.0,
+                nOrders: 10,
+                nSeededLevels: 5
+            )
+        }
+    }
+
+    func testSpotDeploySetDeployerTradingFeeShareMethodSignature() async throws {
+        // Test that spotDeploySetDeployerTradingFeeShare method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.spotDeploySetDeployerTradingFeeShare(
+                token: 12345,
+                share: "0.1"
+            )
+        }
+    }
     
     // MARK: - Parameter Validation Tests
     

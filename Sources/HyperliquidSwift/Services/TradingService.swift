@@ -1138,6 +1138,158 @@ public final class TradingService: Sendable {
         )
     }
 
+    // MARK: - Advanced Spot Freeze Operations
+
+    /// Enable freeze privilege for a spot token
+    /// - Parameter token: Token ID
+    /// - Returns: Enable freeze privilege response as JSONResponse
+    public func spotDeployEnableFreezePrivilege(token: Int) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "enableFreezePrivilege": [
+                    "token": token
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Freeze or unfreeze a user for a spot token
+    /// - Parameters:
+    ///   - token: Token ID
+    ///   - user: User address to freeze/unfreeze
+    ///   - freeze: Whether to freeze (true) or unfreeze (false)
+    /// - Returns: Freeze user response as JSONResponse
+    public func spotDeployFreezeUser(
+        token: Int,
+        user: String,
+        freeze: Bool
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "freezeUser": [
+                    "token": token,
+                    "user": user,
+                    "freeze": freeze
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Revoke freeze privilege for a spot token
+    /// - Parameter token: Token ID
+    /// - Returns: Revoke freeze privilege response as JSONResponse
+    public func spotDeployRevokeFreezePrivilege(token: Int) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "revokeFreezePrivilege": [
+                    "token": token
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Register hyperliquidity for a spot token
+    /// - Parameters:
+    ///   - spot: Spot ID
+    ///   - startPx: Starting price
+    ///   - orderSz: Order size
+    ///   - nOrders: Number of orders
+    ///   - nSeededLevels: Number of seeded levels (optional)
+    /// - Returns: Register hyperliquidity response as JSONResponse
+    public func spotDeployRegisterHyperliquidity(
+        spot: Int,
+        startPx: Double,
+        orderSz: Double,
+        nOrders: Int,
+        nSeededLevels: Int? = nil
+    ) async throws -> JSONResponse {
+        var registerHyperliquidity: [String: any Sendable] = [
+            "spot": spot,
+            "startPx": startPx,
+            "orderSz": orderSz,
+            "nOrders": nOrders
+        ]
+
+        if let nSeededLevels = nSeededLevels {
+            registerHyperliquidity["nSeededLevels"] = nSeededLevels
+        }
+
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "registerHyperliquidity": registerHyperliquidity
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Set deployer trading fee share for a spot token
+    /// - Parameters:
+    ///   - token: Token ID
+    ///   - share: Fee share as string (e.g., "0.1" for 10%)
+    /// - Returns: Set deployer trading fee share response as JSONResponse
+    public func spotDeploySetDeployerTradingFeeShare(
+        token: Int,
+        share: String
+    ) async throws -> JSONResponse {
+        let deployAction: [String: any Sendable] = [
+            "type": "spotDeploy",
+            "spotDeploy": [
+                "setDeployerTradingFeeShare": [
+                    "token": token,
+                    "share": share
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: deployAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
     // MARK: - Private Implementation
 
     private func placeOrder(orderData: [String: any Sendable]) async throws -> JSONResponse {

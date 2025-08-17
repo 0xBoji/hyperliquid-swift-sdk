@@ -336,6 +336,9 @@ swift run AgentManagementExample
 
 # Advanced deployment operations
 swift run AdvancedDeploymentExample
+
+# Advanced spot token operations
+swift run AdvancedSpotOperationsExample
 ```
 
 ### 📋 Example Categories
