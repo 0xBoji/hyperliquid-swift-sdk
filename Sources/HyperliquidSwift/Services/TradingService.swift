@@ -617,6 +617,197 @@ public final class TradingService: Sendable {
         )
     }
 
+    /// Cancel multiple orders by client order ID
+    /// - Parameter cancelRequests: Array of cancel requests with coin and cloid
+    /// - Returns: Bulk cancel response as JSONResponse
+    public func bulkCancelByCloid(_ cancelRequests: [CancelByCloidRequest]) async throws -> JSONResponse {
+        var cancelWires: [[String: any Sendable]] = []
+
+        for request in cancelRequests {
+            let assetId = try await getDynamicAssetId(for: request.coin)
+
+            let cancelWire: [String: any Sendable] = [
+                "a": assetId,
+                "o": request.cloid
+            ]
+
+            cancelWires.append(cancelWire)
+        }
+
+        let cancelAction: [String: any Sendable] = [
+            "type": "cancel",
+            "cancels": cancelWires
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: cancelAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Set expiration time for future orders
+    /// - Parameter expiresAfter: Timestamp in milliseconds after which orders will be rejected (nil to disable)
+    /// - Returns: Set expires after response as JSONResponse
+    public func setExpiresAfter(expiresAfter: Int64?) async throws -> JSONResponse {
+        let expiresAction: [String: any Sendable] = [
+            "type": "setExpiresAfter",
+            "expiresAfter": expiresAfter as Any
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: expiresAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    // MARK: - Advanced Order Types (TPSL)
+
+    /// Place a stop loss order
+    /// - Parameters:
+    ///   - coin: Asset symbol
+    ///   - isBuy: Whether this is a buy order
+    ///   - sz: Order size
+    ///   - triggerPx: Trigger price for the stop loss
+    ///   - limitPx: Limit price (use triggerPx for market stop loss)
+    ///   - isMarket: Whether this is a market stop loss (default: true)
+    ///   - reduceOnly: Whether this is reduce-only (default: true for stop loss)
+    /// - Returns: Stop loss order response as JSONResponse
+    public func stopLossOrder(
+        coin: String,
+        isBuy: Bool,
+        sz: Decimal,
+        triggerPx: Decimal,
+        limitPx: Decimal? = nil,
+        isMarket: Bool = true,
+        reduceOnly: Bool = true
+    ) async throws -> JSONResponse {
+        let orderType: [String: any Sendable] = [
+            "trigger": [
+                "triggerPx": triggerPx.description,
+                "isMarket": isMarket,
+                "tpsl": "sl"
+            ]
+        ]
+
+        let orderData: [String: any Sendable] = [
+            "coin": coin,
+            "is_buy": isBuy,
+            "sz": sz.description,
+            "limit_px": (limitPx ?? triggerPx).description,
+            "order_type": orderType,
+            "reduce_only": reduceOnly
+        ]
+
+        return try await placeOrder(orderData: orderData)
+    }
+
+    /// Place a take profit order
+    /// - Parameters:
+    ///   - coin: Asset symbol
+    ///   - isBuy: Whether this is a buy order
+    ///   - sz: Order size
+    ///   - triggerPx: Trigger price for the take profit
+    ///   - limitPx: Limit price (use triggerPx for market take profit)
+    ///   - isMarket: Whether this is a market take profit (default: true)
+    ///   - reduceOnly: Whether this is reduce-only (default: true for take profit)
+    /// - Returns: Take profit order response as JSONResponse
+    public func takeProfitOrder(
+        coin: String,
+        isBuy: Bool,
+        sz: Decimal,
+        triggerPx: Decimal,
+        limitPx: Decimal? = nil,
+        isMarket: Bool = true,
+        reduceOnly: Bool = true
+    ) async throws -> JSONResponse {
+        let orderType: [String: any Sendable] = [
+            "trigger": [
+                "triggerPx": triggerPx.description,
+                "isMarket": isMarket,
+                "tpsl": "tp"
+            ]
+        ]
+
+        let orderData: [String: any Sendable] = [
+            "coin": coin,
+            "is_buy": isBuy,
+            "sz": sz.description,
+            "limit_px": (limitPx ?? triggerPx).description,
+            "order_type": orderType,
+            "reduce_only": reduceOnly
+        ]
+
+        return try await placeOrder(orderData: orderData)
+    }
+
+    // MARK: - Validator Operations
+
+    /// Register as a validator
+    /// - Parameters:
+    ///   - nodeIp: IP address of the validator node
+    ///   - name: Name of the validator
+    ///   - description: Description of the validator
+    ///   - discordUsername: Discord username for contact
+    ///   - commissionRate: Commission rate (e.g., "0.05" for 5%)
+    /// - Returns: Validator registration response as JSONResponse
+    public func registerValidator(
+        nodeIp: String,
+        name: String,
+        description: String,
+        discordUsername: String,
+        commissionRate: String
+    ) async throws -> JSONResponse {
+        let validatorAction: [String: any Sendable] = [
+            "type": "CValidatorAction",
+            "cValidatorAction": [
+                "register": [
+                    "nodeIp": nodeIp,
+                    "name": name,
+                    "description": description,
+                    "discordUsername": discordUsername,
+                    "commissionRate": commissionRate
+                ]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: validatorAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
+    /// Unregister as a validator
+    /// - Returns: Validator unregistration response as JSONResponse
+    public func unregisterValidator() async throws -> JSONResponse {
+        let validatorAction: [String: any Sendable] = [
+            "type": "CValidatorAction",
+            "cValidatorAction": [
+                "unregister": [:] as [String: String]
+            ]
+        ]
+
+        let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
+        let signedRequest = try await createSignedRequest(action: validatorAction, timestamp: timestamp)
+
+        return try await httpClient.postAndDecode(
+            path: "/exchange",
+            payload: signedRequest,
+            responseType: JSONResponse.self
+        )
+    }
+
     // MARK: - Private Implementation
 
     private func placeOrder(orderData: [String: any Sendable]) async throws -> JSONResponse {

@@ -220,3 +220,14 @@ public struct ModifyRequest: Sendable {
         self.order = order
     }
 }
+
+/// Request to cancel an order by client order ID
+public struct CancelByCloidRequest: Sendable {
+    public let coin: String
+    public let cloid: String
+
+    public init(coin: String, cloid: String) {
+        self.coin = coin
+        self.cloid = cloid
+    }
+}

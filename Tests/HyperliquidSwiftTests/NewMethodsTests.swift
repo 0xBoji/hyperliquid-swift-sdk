@@ -171,6 +171,67 @@ final class NewMethodsTests: XCTestCase {
             try await self.client.getSpotMetaAndAssetCtxs()
         }
     }
+
+    // MARK: - New Methods Tests (Batch 2)
+
+    func testBulkCancelByCloidMethodSignature() async throws {
+        // Test that bulkCancelByCloid method exists with correct signature
+        let cancelRequests = [CancelByCloidRequest(coin: "ETH", cloid: "test_cloid")]
+        let _: () async throws -> JSONResponse = {
+            try await self.client.bulkCancelByCloid(cancelRequests)
+        }
+    }
+
+    func testSetExpiresAfterMethodSignature() async throws {
+        // Test that setExpiresAfter method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.setExpiresAfter(expiresAfter: 1234567890)
+        }
+    }
+
+    func testStopLossOrderMethodSignature() async throws {
+        // Test that stopLossOrder method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.stopLossOrder(
+                coin: "ETH",
+                isBuy: false,
+                sz: Decimal(0.1),
+                triggerPx: Decimal(2000)
+            )
+        }
+    }
+
+    func testTakeProfitOrderMethodSignature() async throws {
+        // Test that takeProfitOrder method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.takeProfitOrder(
+                coin: "BTC",
+                isBuy: true,
+                sz: Decimal(0.01),
+                triggerPx: Decimal(50000)
+            )
+        }
+    }
+
+    func testRegisterValidatorMethodSignature() async throws {
+        // Test that registerValidator method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.registerValidator(
+                nodeIp: "192.168.1.100",
+                name: "TestValidator",
+                description: "Test validator description",
+                discordUsername: "testuser#1234",
+                commissionRate: "0.05"
+            )
+        }
+    }
+
+    func testUnregisterValidatorMethodSignature() async throws {
+        // Test that unregisterValidator method exists with correct signature
+        let _: () async throws -> JSONResponse = {
+            try await self.client.unregisterValidator()
+        }
+    }
     
     // MARK: - Parameter Validation Tests
     

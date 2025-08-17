@@ -760,4 +760,84 @@ extension HyperliquidClient {
         return try await tradingService.useBigBlocks(enable: enable)
     }
 
+    /// Cancel multiple orders by client order ID
+    public func bulkCancelByCloid(_ cancelRequests: [CancelByCloidRequest]) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.bulkCancelByCloid(cancelRequests)
+    }
+
+    /// Set expiration time for future orders
+    public func setExpiresAfter(expiresAfter: Int64?) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.setExpiresAfter(expiresAfter: expiresAfter)
+    }
+
+    /// Place a stop loss order
+    public func stopLossOrder(
+        coin: String,
+        isBuy: Bool,
+        sz: Decimal,
+        triggerPx: Decimal,
+        limitPx: Decimal? = nil,
+        isMarket: Bool = true,
+        reduceOnly: Bool = true
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.stopLossOrder(
+            coin: coin,
+            isBuy: isBuy,
+            sz: sz,
+            triggerPx: triggerPx,
+            limitPx: limitPx,
+            isMarket: isMarket,
+            reduceOnly: reduceOnly
+        )
+    }
+
+    /// Place a take profit order
+    public func takeProfitOrder(
+        coin: String,
+        isBuy: Bool,
+        sz: Decimal,
+        triggerPx: Decimal,
+        limitPx: Decimal? = nil,
+        isMarket: Bool = true,
+        reduceOnly: Bool = true
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.takeProfitOrder(
+            coin: coin,
+            isBuy: isBuy,
+            sz: sz,
+            triggerPx: triggerPx,
+            limitPx: limitPx,
+            isMarket: isMarket,
+            reduceOnly: reduceOnly
+        )
+    }
+
+    /// Register as a validator
+    public func registerValidator(
+        nodeIp: String,
+        name: String,
+        description: String,
+        discordUsername: String,
+        commissionRate: String
+    ) async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.registerValidator(
+            nodeIp: nodeIp,
+            name: name,
+            description: description,
+            discordUsername: discordUsername,
+            commissionRate: commissionRate
+        )
+    }
+
+    /// Unregister as a validator
+    public func unregisterValidator() async throws -> JSONResponse {
+        guard let tradingService = tradingService else { throw HyperliquidError.clientNotInitialized }
+        return try await tradingService.unregisterValidator()
+    }
+
 }

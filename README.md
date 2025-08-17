@@ -315,14 +315,22 @@ swift run BuilderFeeExample
 
 # Performance optimization
 swift run UseBigBlocksExample
+
+# TPSL (Take Profit/Stop Loss) orders
+swift run TPSLOrdersExample
+
+# Bulk cancellation and order expiration
+swift run BulkCancelExample
 ```
 
 ### 📋 Example Categories
 
-- **Core Trading**: Basic usage, advanced trading, market orders
+- **Core Trading**: Basic usage, advanced trading, market orders, TPSL orders
 - **Account Management**: Leverage, margin, referrals, sub-accounts
 - **Transfer Operations**: USD, spot tokens, sub-accounts, vault transfers
 - **Advanced Features**: Multi-sig, builder fees, big blocks, token delegation
+- **Order Management**: Bulk cancellation, order expiration, advanced cancellation
+- **Validator Operations**: Validator registration and management
 - **Real-time Data**: WebSocket subscriptions and market data streaming
 
 Each example corresponds to similar functionality in the Python SDK examples, ensuring consistency across implementations.
