@@ -2,12 +2,12 @@
 
 A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exchange.
 
-**Current Version: v1.3.0** 🎯
+**Current Version: v1.4.0** 🎯
 
 [![Swift](https://img.shields.io/badge/Swift-5.5+-orange.svg)](https://swift.org)
 [![Platform](https://img.shields.io/badge/Platform-iOS%2013%2B%20%7C%20macOS%2010.15%2B-lightgrey.svg)](https://developer.apple.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-v1.3.0-green.svg)](https://github.com/hyperliquid-dex/hyperliquid-swift-sdk/releases)
+[![Version](https://img.shields.io/badge/Version-v1.4.0-green.svg)](https://github.com/hyperliquid-dex/hyperliquid-swift-sdk/releases)
 
 ## ✨ Features
 
@@ -347,7 +347,16 @@ Each example corresponds to similar functionality in the Python SDK examples, en
 
 ## 📋 Changelog
 
-### v1.3.0 (Latest) - Advanced Trading Features
+### v1.4.0 (Latest) - Infrastructure & Deployment Operations
+- ✅ **Validator Management**: `changeValidatorProfile` for validator configuration updates
+- ✅ **Signer Operations**: `cSignerUnjailSelf` and `cSignerJailSelf` for network participation
+- ✅ **Spot Deployment**: `spotDeployRegisterToken` for new token registration
+- ✅ **Perpetual Deployment**: `perpDeployRegisterAsset` for new asset registration
+- ✅ **New Examples**: ValidatorManagementExample and DeploymentExample
+- ✅ **98% Feature Parity**: 95/97 methods implemented
+- ✅ **Infrastructure Ready**: Complete validator and deployment support
+
+### v1.3.0 - Advanced Trading Features
 - ✅ **TPSL Orders**: `stopLossOrder` and `takeProfitOrder` for automated risk management
 - ✅ **Bulk Cancellation**: `bulkCancelByCloid` for efficient order management
 - ✅ **Order Expiration**: `setExpiresAfter` for automated order lifecycle
