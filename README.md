@@ -1,6 +1,6 @@
 # 🚀 Hyperliquid Swift SDK
 
-A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exchange.
+A **complete** Swift SDK for the Hyperliquid decentralized exchange.
 
 **Current Version: v1.6.0** 🎯
 
@@ -8,6 +8,8 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
 [![Platform](https://img.shields.io/badge/Platform-iOS%2013%2B%20%7C%20macOS%2010.15%2B-lightgrey.svg)](https://developer.apple.com)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-v1.6.0-green.svg)](https://github.com/hyperliquid-dex/hyperliquid-swift-sdk/releases)
+[![Code style: SwiftFormat](https://img.shields.io/badge/code%20style-SwiftFormat-000000.svg)](https://github.com/nicklockwood/SwiftFormat)
+[![Lint: SwiftLint](https://img.shields.io/badge/lint-SwiftLint-green.svg)](https://github.com/realm/SwiftLint)
 
 ## ✨ Features
 
@@ -21,7 +23,7 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
 - **🎯 Async/Await**: Modern Swift concurrency support
 - **🌐 Multi-Environment**: Testnet and Mainnet support
 - **🛡️ Enterprise Grade**: Production-ready cryptography and error handling
-
+- **🛠️ Development Tools**: Makefile, SwiftLint, SwiftFormat for code quality
 
 ## ✅ Implemented Feature Checklist
 
@@ -51,6 +53,13 @@ A **complete, production-ready** Swift SDK for the Hyperliquid decentralized exc
   - [x] Multi-sig operations, Use big blocks
 - Real‑time
   - [x] WebSocket subscriptions
+- Development Tools
+  - [x] Makefile with common commands
+  - [x] SwiftLint configuration
+  - [x] SwiftFormat configuration
+  - [x] Constants for easy customization
+  - [x] Error types (ClientError, ServerError, NetworkError)
+  - [x] Market making strategy example
 
 ## 🛣️ Future Features
 
@@ -95,6 +104,47 @@ let response = try await client.limitBuy(
     reduceOnly: false
 )
 ```
+
+## 🛠️ Development Tools
+
+### Makefile Commands
+
+```bash
+# Build the package
+make build
+
+# Run tests
+make test
+
+# Run linting
+make lint
+
+# Format code
+make format
+
+# Clean build artifacts
+make clean
+
+# Install dependencies
+make install
+
+# Generate documentation
+make docs
+
+# Run all examples
+make examples
+
+# Run security checks
+make security
+```
+
+### Code Quality
+
+The SDK includes:
+- **SwiftLint**: Code linting with custom rules
+- **SwiftFormat**: Automatic code formatting
+- **Constants**: Easy customization points
+- **Error Types**: Comprehensive error handling
 
 ## 📖 API Reference
 
@@ -303,6 +353,9 @@ swift run TradingExample
 # Advanced trading operations (market orders, cancel all, modify)
 swift run AdvancedTradingExample
 
+# Market making strategy (similar to Python SDK's basic_adding.py)
+swift run MarketMakingExample
+
 # New Info API methods (fees, funding, referrals, sub accounts)
 swift run NewMethodsExample
 
@@ -344,6 +397,7 @@ swift run AdvancedSpotOperationsExample
 ### 📋 Example Categories
 
 - **Core Trading**: Basic usage, advanced trading, market orders, TPSL orders
+- **Market Making**: Automated liquidity provision strategy
 - **Account Management**: Leverage, margin, referrals, sub-accounts
 - **Transfer Operations**: USD, spot tokens, sub-accounts, vault transfers
 - **Advanced Features**: Multi-sig, builder fees, big blocks, token delegation
@@ -356,6 +410,14 @@ swift run AdvancedSpotOperationsExample
 Each example corresponds to similar functionality in the Python SDK examples, ensuring consistency across implementations.
 
 ## 📋 Changelog
+
+### v1.6.1 - Development Tools & Market Making 🛠️
+- ✅ **Development Tools**: Added Makefile, SwiftLint, SwiftFormat
+- ✅ **Constants**: Added Constants.swift for easy customization
+- ✅ **Error Types**: Added ClientError, ServerError, NetworkError
+- ✅ **Market Making**: Added MarketMakingExample (similar to Python SDK's basic_adding.py)
+- ✅ **Code Quality**: Comprehensive linting and formatting rules
+- ✅ **Documentation**: Updated README with development tools section
 
 ### v1.6.0 (Latest) - Beyond 100% - Advanced Spot Operations 🚀
 - ✅ **Freeze Operations**: `spotDeployEnableFreezePrivilege`, `spotDeployFreezeUser`, `spotDeployRevokeFreezePrivilege`
@@ -481,6 +543,9 @@ HyperliquidSwift/
 │   ├── HTTPClient.swift       # Network layer
 │   └── TradingService.swift   # Trading operations
 ├── Utils/            # Utilities and helpers
+│   ├── Constants.swift        # Global constants
+│   ├── ErrorTypes.swift       # Error handling
+│   └── Validation.swift       # Input validation
 └── HyperliquidClient.swift    # Main client interface
 ```
 

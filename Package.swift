@@ -28,7 +28,10 @@ let package = Package(
             name: "AdvancedTradingExample",
             targets: ["AdvancedTradingExample"]
         ),
-
+        .executable(
+            name: "MarketMakingExample",
+            targets: ["MarketMakingExample"]
+        ),
 
     ],
     dependencies: [
@@ -61,6 +64,12 @@ let package = Package(
             dependencies: ["HyperliquidSwift"],
             path: "Examples",
             sources: ["AdvancedTradingExample.swift"]
+        ),
+        .executableTarget(
+            name: "MarketMakingExample",
+            dependencies: ["HyperliquidSwift"],
+            path: "Examples",
+            sources: ["MarketMakingExample.swift"]
         ),
 
         .testTarget(

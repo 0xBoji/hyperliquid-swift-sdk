@@ -1,9 +1,21 @@
+# Xcode
 .DS_Store
-/.build
-/Packages
 xcuserdata/
-DerivedData/
-.swiftpm/configuration/registries.json
-.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
-.netrc
+*.xcworkspace
+*.xcodeproj
 actionerror.md
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Generated files
+*.generated.swift
+
+# Test artifacts
+Tests/Resources/cassettes/
+
+# Config files with sensitive data
+Examples/config.json
+
+# Conventional commits template
+.gitmessage
