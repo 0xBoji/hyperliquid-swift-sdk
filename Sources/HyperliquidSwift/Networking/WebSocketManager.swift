@@ -269,13 +269,23 @@ public struct L2BookData: Codable, Sendable {
         
         self.coin = try container.decode(String.self, forKey: .coin)
         
-        // Handle levels as array of arrays, with flexible parsing
-        let levelsArray = try container.decode([[[String: Any]]].self, forKey: .levels)
+        // Handle levels with flexible parsing using JSONSerialization
+        let levelsData = try container.decode(Data.self, forKey: .levels)
+        let levelsJSON = try JSONSerialization.jsonObject(with: levelsData)
+        
+        guard let levelsArray = levelsJSON as? [[[Any]]] else {
+            throw DecodingError.dataCorruptedError(forKey: .levels, in: container, debugDescription: "Expected array of arrays")
+        }
+        
         var parsedLevels: [[L2Level]] = []
         
         for levelGroup in levelsArray {
             var parsedGroup: [L2Level] = []
-            for levelDict in levelGroup {
+            for levelItem in levelGroup {
+                guard let levelDict = levelItem as? [String: Any] else {
+                    continue
+                }
+                
                 let px: Decimal
                 let sz: Decimal
                 let n: Int
