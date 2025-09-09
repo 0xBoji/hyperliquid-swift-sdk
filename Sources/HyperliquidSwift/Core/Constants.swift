@@ -12,8 +12,10 @@ public enum Constants {
     public enum API {
         public static let mainnetURL = "https://api.hyperliquid.xyz"
         public static let testnetURL = "https://api.hyperliquid-testnet.xyz"
+        public static let localURL = "http://localhost:3001"
         public static let mainnetWS = "wss://api.hyperliquid.xyz/ws"
         public static let testnetWS = "wss://api.hyperliquid-testnet.xyz/ws"
+        public static let localWS = "ws://localhost:3001/ws"
         
         public static let infoPath = "/info"
         public static let exchangePath = "/exchange"

@@ -356,6 +356,15 @@ swift run AdvancedTradingExample
 # Market making strategy (similar to Python SDK's basic_adding.py)
 swift run MarketMakingExample
 
+# Spot trading operations (similar to Python SDK's basic_spot_order.py)
+swift run SpotTradingExample
+
+# WebSocket real-time data streaming (similar to Python SDK's basic_ws.py)
+swift run WebSocketExample
+
+# Staking operations and token delegation (similar to Python SDK's basic_staking.py)
+swift run StakingExample
+
 # New Info API methods (fees, funding, referrals, sub accounts)
 swift run NewMethodsExample
 
@@ -397,7 +406,10 @@ swift run AdvancedSpotOperationsExample
 ### 📋 Example Categories
 
 - **Core Trading**: Basic usage, advanced trading, market orders, TPSL orders
-- **Market Making**: Automated liquidity provision strategy
+- **Market Making**: Automated liquidity provision strategy (similar to Python SDK)
+- **Spot Trading**: Spot token trading operations (similar to Python SDK)
+- **WebSocket**: Real-time data streaming (similar to Python SDK)
+- **Staking**: Token delegation and staking operations (similar to Python SDK)
 - **Account Management**: Leverage, margin, referrals, sub-accounts
 - **Transfer Operations**: USD, spot tokens, sub-accounts, vault transfers
 - **Advanced Features**: Multi-sig, builder fees, big blocks, token delegation
@@ -411,13 +423,17 @@ Each example corresponds to similar functionality in the Python SDK examples, en
 
 ## 📋 Changelog
 
-### v1.6.1 - Development Tools & Market Making 🛠️
+### v1.6.1 - Development Tools & New Examples 🛠️
 - ✅ **Development Tools**: Added Makefile, SwiftLint, SwiftFormat
 - ✅ **Constants**: Added Constants.swift for easy customization
 - ✅ **Error Types**: Added ClientError, ServerError, NetworkError
 - ✅ **Market Making**: Added MarketMakingExample (similar to Python SDK's basic_adding.py)
+- ✅ **Spot Trading**: Added SpotTradingExample (similar to Python SDK's basic_spot_order.py)
+- ✅ **WebSocket**: Added WebSocketExample (similar to Python SDK's basic_ws.py)
+- ✅ **Staking**: Added StakingExample (similar to Python SDK's basic_staking.py)
 - ✅ **Code Quality**: Comprehensive linting and formatting rules
-- ✅ **Documentation**: Updated README with development tools section
+- ✅ **Documentation**: Updated README with development tools and new examples
+- ✅ **Conventional Commits**: Added git commit template for consistent commits
 
 ### v1.6.0 (Latest) - Beyond 100% - Advanced Spot Operations 🚀
 - ✅ **Freeze Operations**: `spotDeployEnableFreezePrivilege`, `spotDeployFreezeUser`, `spotDeployRevokeFreezePrivilege`

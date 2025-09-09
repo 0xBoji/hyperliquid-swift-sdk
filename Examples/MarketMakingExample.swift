@@ -43,10 +43,10 @@ public struct MarketMakingExample {
         let allMids = try await client.getAllMids()
         let l2Book = try await client.getL2Book(coin: Self.COIN)
         
-        guard let currentPrice = allMids[Self.COIN],
-              let price = Decimal(string: currentPrice) else {
+        guard let currentPrice = allMids[Self.COIN] else {
             throw MarketMakingError.invalidPrice
         }
+        let price = currentPrice
         
         // Calculate target prices
         let bidPrice = price * (1 - Self.DEPTH)
@@ -94,13 +94,13 @@ public struct MarketMakingExample {
         
         // Cancel existing orders
         for order in openOrders where order.coin == Self.COIN {
-            try await client.cancelOrder(coin: Self.COIN, oid: order.oid)
+            _ = try await client.cancelOrder(coin: Self.COIN, oid: order.oid)
         }
         
         // Place new orders based on position
         if currentPosition < Self.MAX_POSITION {
             // Can place bid order
-            try await client.limitBuy(
+            _ = try await client.limitBuy(
                 coin: Self.COIN,
                 sz: orderSize,
                 px: bidPrice,
@@ -111,7 +111,7 @@ public struct MarketMakingExample {
         
         if currentPosition > -Self.MAX_POSITION {
             // Can place ask order
-            try await client.limitSell(
+            _ = try await client.limitSell(
                 coin: Self.COIN,
                 sz: orderSize,
                 px: askPrice,
@@ -144,9 +144,15 @@ public enum MarketMakingError: Error, LocalizedError {
 @main
 struct MarketMakingExampleMain {
     static func main() async throws {
-        let (userAddress, client) = try await ExampleUtils.setup()
+        // Simple setup for demo
+        let userAddress = "0x1234567890123456789012345678901234567890"
+        let client = try HyperliquidClient(
+            privateKeyHex: "your_private_key_here",
+            environment: .testnet
+        )
         
         let strategy = MarketMakingExample(client: client, userAddress: userAddress)
         try await strategy.run()
     }
 }
+

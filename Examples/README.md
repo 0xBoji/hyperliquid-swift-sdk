@@ -8,15 +8,35 @@ This directory contains comprehensive examples demonstrating how to use the Hype
 - **`BasicUsage.swift`** - Basic SDK setup and simple operations
 - **`TradingExample.swift`** - Limit orders, market orders, cancellations
 - **`AdvancedTradingExample.swift`** - Advanced trading strategies and bulk operations
+- **`MarketMakingExample.swift`** - Market making strategy (similar to Python's `basic_adding.py`)
+
+### Spot Trading & WebSocket
+- **`SpotTradingExample.swift`** - Spot trading operations (similar to Python's `basic_spot_order.py`)
+- **`WebSocketExample.swift`** - Real-time data streaming (similar to Python's `basic_ws.py`)
+
+### Staking & Rewards
+- **`StakingExample.swift`** - Staking operations and token delegation (similar to Python's `basic_staking.py`)
 
 ### Transfer & Account Management
 - **`TransferExample.swift`** - USD transfers, spot transfers, sub-account operations
+- **`NewMethodsExample.swift`** - New Info API methods (fees, funding, referrals, sub accounts)
+- **`TPSLOrdersExample.swift`** - Take Profit/Stop Loss orders
+- **`BulkCancelExample.swift`** - Bulk cancellation and order expiration
 
-### New Advanced Features
+### Advanced Features
 - **`ConvertToMultiSigExample.swift`** - Convert account to multi-signature user
 - **`UseBigBlocksExample.swift`** - Enable/disable big blocks for performance
 - **`BuilderFeeExample.swift`** - Approve builder fees and route orders through builders
 - **`MultiSigOrderExample.swift`** - Execute orders using multi-signature authentication
+
+### Validator & Deployment Operations
+- **`ValidatorManagementExample.swift`** - Validator registration and profile management
+- **`DeploymentExample.swift`** - Token and asset deployment operations
+- **`AdvancedDeploymentExample.swift`** - Advanced deployment operations
+- **`AdvancedSpotOperationsExample.swift`** - Advanced spot token operations
+
+### Agent Management
+- **`AgentManagementExample.swift`** - Agent wallet creation and approval
 
 ### Utility
 - **`ExampleUtils.swift`** - Shared utilities for configuration and setup
@@ -57,6 +77,18 @@ swift run TradingExample
 
 #### Advanced Features
 ```swift
+// Market making strategy
+swift run MarketMakingExample
+
+// Spot trading operations
+swift run SpotTradingExample
+
+// WebSocket real-time data
+swift run WebSocketExample
+
+// Staking operations
+swift run StakingExample
+
 // Convert to multi-sig user (PERMANENT - use with caution!)
 swift run ConvertToMultiSigExample
 
@@ -68,6 +100,45 @@ swift run BuilderFeeExample
 ```
 
 ## 📋 Example Descriptions
+
+### MarketMakingExample.swift
+Demonstrates a market making strategy similar to Python SDK's `basic_adding.py`. This example shows how to provide liquidity by placing both buy and sell orders around the current market price.
+
+**Key Features:**
+- Real-time market data monitoring
+- Automated order placement and cancellation
+- Position-based order management
+- Risk management with position limits
+
+### SpotTradingExample.swift
+Shows how to perform spot trading operations, similar to Python SDK's `basic_spot_order.py`.
+
+**Key Features:**
+- Spot user state queries
+- Spot order placement (buy/sell)
+- Order status tracking
+- Balance management
+
+### WebSocketExample.swift
+Demonstrates real-time data streaming using WebSocket subscriptions, similar to Python SDK's `basic_ws.py`.
+
+**Key Features:**
+- All market prices (allMids)
+- Order book updates (l2Book)
+- Trade updates (trades)
+- User events and fills
+- Candle data streaming
+- BBO (Best Bid/Offer) updates
+
+### StakingExample.swift
+Shows staking operations and token delegation, similar to Python SDK's `basic_staking.py`.
+
+**Key Features:**
+- User staking summary
+- Staking delegations
+- Staking rewards history
+- Token delegation to validators
+- Undelegation operations
 
 ### ConvertToMultiSigExample.swift
 Demonstrates how to convert a regular account to a multi-signature user account. This is a **permanent operation** that requires multiple signatures for future transactions.
@@ -164,6 +235,9 @@ When adding new examples:
 - **Multi-sig conversion is permanent** - cannot be easily reversed
 - **Builder fees** require main wallet permissions, not agent wallets
 - **Keep your private keys secure** and never commit them to version control
+- **Market making strategies** require careful risk management and monitoring
+- **WebSocket examples** demonstrate subscription patterns but may need full implementation
+- **Spot trading** requires proper spot token balances and permissions
 
 ## 📞 Support
 

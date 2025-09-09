@@ -32,6 +32,18 @@ let package = Package(
             name: "MarketMakingExample",
             targets: ["MarketMakingExample"]
         ),
+        .executable(
+            name: "WebSocketExample",
+            targets: ["WebSocketExample"]
+        ),
+        .executable(
+            name: "SpotTradingExample",
+            targets: ["SpotTradingExample"]
+        ),
+        .executable(
+            name: "StakingExample",
+            targets: ["StakingExample"]
+        ),
 
     ],
     dependencies: [
@@ -70,6 +82,24 @@ let package = Package(
             dependencies: ["HyperliquidSwift"],
             path: "Examples",
             sources: ["MarketMakingExample.swift"]
+        ),
+        .executableTarget(
+            name: "WebSocketExample",
+            dependencies: ["HyperliquidSwift"],
+            path: "Examples",
+            sources: ["WebSocketExample.swift"]
+        ),
+        .executableTarget(
+            name: "SpotTradingExample",
+            dependencies: ["HyperliquidSwift"],
+            path: "Examples",
+            sources: ["SpotTradingExample.swift"]
+        ),
+        .executableTarget(
+            name: "StakingExample",
+            dependencies: ["HyperliquidSwift"],
+            path: "Examples",
+            sources: ["StakingExample.swift"]
         ),
 
         .testTarget(
