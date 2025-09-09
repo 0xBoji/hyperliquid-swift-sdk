@@ -263,6 +263,55 @@ public struct L2BookData: Codable, Sendable {
         self.coin = coin
         self.levels = levels
     }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        self.coin = try container.decode(String.self, forKey: .coin)
+        
+        // Handle levels as array of arrays, with flexible parsing
+        let levelsArray = try container.decode([[[String: Any]]].self, forKey: .levels)
+        var parsedLevels: [[L2Level]] = []
+        
+        for levelGroup in levelsArray {
+            var parsedGroup: [L2Level] = []
+            for levelDict in levelGroup {
+                let px: Decimal
+                let sz: Decimal
+                let n: Int
+                
+                // Parse px
+                if let pxString = levelDict["px"] as? String {
+                    px = Decimal(string: pxString) ?? Decimal(0)
+                } else if let pxNumber = levelDict["px"] as? NSNumber {
+                    px = Decimal(string: pxNumber.stringValue) ?? Decimal(0)
+                } else {
+                    px = Decimal(0)
+                }
+                
+                // Parse sz
+                if let szString = levelDict["sz"] as? String {
+                    sz = Decimal(string: szString) ?? Decimal(0)
+                } else if let szNumber = levelDict["sz"] as? NSNumber {
+                    sz = Decimal(string: szNumber.stringValue) ?? Decimal(0)
+                } else {
+                    sz = Decimal(0)
+                }
+                
+                // Parse n
+                n = levelDict["n"] as? Int ?? 0
+                
+                parsedGroup.append(L2Level(px: px, sz: sz, n: n))
+            }
+            parsedLevels.append(parsedGroup)
+        }
+        
+        self.levels = parsedLevels
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case coin, levels
+    }
 }
 
 public struct L2Level: Codable, Sendable {
@@ -274,6 +323,30 @@ public struct L2Level: Codable, Sendable {
         self.px = px
         self.sz = sz
         self.n = n
+    }
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Handle px as either String or Decimal
+        if let pxString = try? container.decode(String.self, forKey: .px) {
+            self.px = Decimal(string: pxString) ?? Decimal(0)
+        } else {
+            self.px = try container.decode(Decimal.self, forKey: .px)
+        }
+        
+        // Handle sz as either String or Decimal
+        if let szString = try? container.decode(String.self, forKey: .sz) {
+            self.sz = Decimal(string: szString) ?? Decimal(0)
+        } else {
+            self.sz = try container.decode(Decimal.self, forKey: .sz)
+        }
+        
+        self.n = try container.decode(Int.self, forKey: .n)
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case px, sz, n
     }
 }
 

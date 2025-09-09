@@ -50,7 +50,7 @@ public actor InfoService: HTTPService {
     }
     
     /// Get L2 order book for a specific asset
-    public func getL2Book(coin: String) async throws -> L2BookData {
+    public func getL2Book(coin: String) async throws -> JSONResponse {
         let payload = [
             "type": "l2Book",
             "coin": coin
@@ -59,7 +59,7 @@ public actor InfoService: HTTPService {
         return try await httpClient.postAndDecode(
             path: "/info",
             payload: payload,
-            responseType: L2BookData.self
+            responseType: JSONResponse.self
         )
     }
     

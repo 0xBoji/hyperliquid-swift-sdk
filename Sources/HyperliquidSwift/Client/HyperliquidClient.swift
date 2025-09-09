@@ -61,7 +61,7 @@ public actor HyperliquidClient {
     }
 
     /// Get L2 order book for a specific asset
-    public func getL2Book(coin: String) async throws -> L2BookData {
+    public func getL2Book(coin: String) async throws -> JSONResponse {
         return try await infoService.getL2Book(coin: coin)
     }
 
