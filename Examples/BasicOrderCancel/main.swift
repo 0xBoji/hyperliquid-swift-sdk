@@ -35,9 +35,9 @@ struct BasicOrderCancel {
 			print("Addresses match:", accountAddress == recoveredAddress)
 			
 			// Try to cancel an existing order from BasicPlaceOnlyOrder
-			// Use the order ID from the previous run: 39125080937
+			// Use the order ID from the previous run: 39125151811
 			let coin = "ETH"
-			let existingOid: Int64 = 39125080937
+			let existingOid: Int64 = 39125151811
 			
 			print("Attempting to cancel existing order with oid:", existingOid)
 			print("Account address:", try exch.getAccountAddress())
