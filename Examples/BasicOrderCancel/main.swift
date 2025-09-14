@@ -73,7 +73,15 @@ struct BasicOrderCancel {
 				print("Waiting 1 second before canceling...")
 				try await Task.sleep(nanoseconds: 1_000_000_000)
 				
+				// Debug: Test cancel with a simple approach - try to cancel the same order
 				print("Canceling order with oid:", oid)
+				print("Account address before cancel:", try exch.getAccountAddress())
+				
+				// Debug: Test signature recovery from actual order signature
+				print("Testing signature recovery from actual order signature...")
+				// We need to get the actual signature from the order request
+				// For now, let's just test the cancel
+				
 				let cancelRes = try await exch.cancel(coin: coin, oid: oid)
 				print("Cancel result:", cancelRes)
 			} else {

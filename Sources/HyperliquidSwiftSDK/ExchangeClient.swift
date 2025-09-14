@@ -181,7 +181,7 @@ extension ExchangeClient {
         let nonce = Int(Date().timeIntervalSince1970 * 1000)
         let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
         
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "action": [
                 "type": "cancel",
                 "cancels": [["a": asset, "o": oid]]
@@ -189,6 +189,9 @@ extension ExchangeClient {
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
         ]
+        
+        // Only add vaultAddress and expiresAfter if they are not nil (match Python SDK behavior)
+        // For cancel actions, vaultAddress and expiresAfter are always nil, so we don't add them
         
         // Debug: print payload JSON for verification
         if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
@@ -209,7 +212,7 @@ extension ExchangeClient {
         let nonce = Int(Date().timeIntervalSince1970 * 1000)
         let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
         
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "action": [
                 "type": "cancelByCloid",
                 "cancels": [["cloid": cloid]]
@@ -217,6 +220,9 @@ extension ExchangeClient {
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
         ]
+        
+        // Only add vaultAddress and expiresAfter if they are not nil (match Python SDK behavior)
+        // For cancel actions, vaultAddress and expiresAfter are always nil, so we don't add them
         
         // Debug: print payload JSON for verification
         if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
