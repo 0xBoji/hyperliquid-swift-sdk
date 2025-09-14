@@ -1,94 +1,55 @@
 import Foundation
 import HyperliquidSwiftSDK
 
+struct Config: Decodable { let secret_key: String }
+
+func loadSecret() -> String {
+	let url = URL(fileURLWithPath: "Examples/config.json")
+	if let data = try? Data(contentsOf: url), let cfg = try? JSONDecoder().decode(Config.self, from: data) {
+		return cfg.secret_key
+	}
+	return ""
+}
+
 @main
-struct BasicOrderCancelExample {
-    static func main() async {
-        print("🚀 Hyperliquid Swift SDK - Basic Order Cancel Example")
-        print("=====================================================")
-        
-        do {
-            // Initialize info client (no private key needed for market data)
-            let baseURL = URL(string: "https://api.hyperliquid-testnet.xyz")!
-            let info = InfoClient(
-                config: InfoClientConfig(baseURL: baseURL)
-            )
-            
-            print("\n📊 Market Data")
-            print("==============")
-            
-            // Get current market prices
-            let mids = try await info.allMids()
-            print("Available markets: \(mids.count)")
-            
-            // Use ETH for this example
-            guard let ethPrice = mids["ETH"], let price = Double(ethPrice) else {
-                print("❌ ETH price not found")
-                return
-            }
-            
-            print("ETH current price: $\(String(format: "%.2f", price))")
-            
-            print("\n📈 Order Management Demo")
-            print("=======================")
-            
-            // Demo the order structure that would be created
-            let clientOrderId = "swift-sdk-\(Int(Date().timeIntervalSince1970))"
-            let orderPrice = price * 0.95 // 5% below market price
-            let orderSize = 0.01 // Small size for testing
-            
-            print("Demo order structure:")
-            print("- Coin: ETH")
-            print("- Side: Buy")
-            print("- Size: \(orderSize)")
-            print("- Price: $\(String(format: "%.2f", orderPrice))")
-            print("- Client Order ID: \(clientOrderId)")
-            
-            print("\n🔧 ExchangeClient Methods Available:")
-            print("===================================")
-            print("✅ exchange.order() - Place limit/market orders")
-            print("✅ exchange.marketOpen() - Market orders with slippage")
-            print("✅ exchange.cancel() - Cancel by order ID")
-            print("✅ exchange.cancelByCloid() - Cancel by client order ID")
-            
-            print("\n📋 Order Types Supported:")
-            print("========================")
-            print("• Limit orders: [\"limit\": [\"tif\": \"Gtc\"]]")
-            print("• Market orders: [\"limit\": [\"tif\": \"Ioc\"]]")
-            print("• Trigger orders: [\"trigger\": [\"triggerPx\": price]]")
-            
-            print("\n🎯 Usage Example:")
-            print("================")
-            print("""
-            // Place order
-            let result = try await exchange.order(
-                coin: "ETH",
-                isBuy: true,
-                sz: 0.01,
-                limitPx: 4500.0,
-                orderType: ["limit": ["tif": "Gtc"]],
-                cloid: "my-order-123"
-            )
-            
-            // Cancel by client order ID
-            let cancelResult = try await exchange.cancelByCloid(cloid: "my-order-123")
-            """)
-            
-            print("\n🎉 Example completed successfully!")
-            print("This demonstrates:")
-            print("1. Market data retrieval")
-            print("2. Order structure and parameters")
-            print("3. Available trading methods")
-            print("4. Order cancellation capabilities")
-            print("\n💡 To test with real orders, update config.json with a valid private key")
-            
-        } catch {
-            print("❌ Error: \(error)")
-            if let nsError = error as NSError? {
-                print("Error domain: \(nsError.domain)")
-                print("Error code: \(nsError.code)")
-                print("Error description: \(nsError.localizedDescription)")
-            }
-        }
-    }
+struct BasicOrderCancel {
+	static func main() async {
+		let sk = loadSecret()
+		guard !sk.isEmpty else { print("missing secret_key in Examples/config.json"); exit(1) }
+		let base = InfoClient.defaultURL(for: .testnet)
+		do {
+			let exch = try ExchangeClient(baseURL: base, privateKeyHex: sk)
+			
+			// Place a limit order with unique client order ID
+			let coin = "ETH"
+			let isBuy = true
+			let size = 0.01
+			let limitPx = 4400.0
+			let cloid = "swift-cancel-\(Int(Date().timeIntervalSince1970))"
+			
+			print("Placing order with cloid: \(cloid)")
+			let orderRes = try await exch.order(
+				coin: coin,
+				isBuy: isBuy,
+				sz: size,
+				limitPx: limitPx,
+				orderType: ["limit": ["tif": "Gtc"]],
+				cloid: cloid
+			)
+			print("Order placed:", orderRes)
+			
+			// Wait a moment then cancel
+			print("Waiting 2 seconds before canceling...")
+			try await Task.sleep(nanoseconds: 2_000_000_000)
+			
+			// Cancel by client order ID
+			print("Canceling order by cloid: \(cloid)")
+			let cancelRes = try await exch.cancelByCloid(cloid: cloid)
+			print("Order canceled:", cancelRes)
+			
+		} catch {
+			print("Error:", error)
+			exit(1)
+		}
+	}
 }
