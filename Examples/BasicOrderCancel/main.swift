@@ -42,8 +42,20 @@ struct BasicOrderCancel {
 			print("Attempting to cancel existing order with oid:", existingOid)
 			print("Account address:", try exch.getAccountAddress())
 			
+			// Debug: Test signature recovery from actual cancel signature
+			print("Testing signature recovery from actual cancel signature...")
+			// We need to get the actual signature from the cancel request
+			// For now, let's just test the cancel
+			
 			let cancelRes = try await exch.cancel(coin: coin, oid: existingOid)
 			print("Cancel result:", cancelRes)
+			
+			// Debug: Try to recover address from actual cancel signature
+			if let cancelString = cancelRes as? String,
+			   let cancelData = cancelString.data(using: .utf8),
+			   let cancelJson = try? JSONSerialization.jsonObject(with: cancelData) as? [String: Any] {
+				print("Cancel response data:", cancelJson)
+			}
 			
 		} catch {
 			print("Error:", error)
