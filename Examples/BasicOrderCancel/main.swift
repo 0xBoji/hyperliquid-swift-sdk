@@ -34,59 +34,16 @@ struct BasicOrderCancel {
 			print("Recovered address from signature:", recoveredAddress)
 			print("Addresses match:", accountAddress == recoveredAddress)
 			
-			// Place a new order to test with same account
+			// Try to cancel an existing order from BasicPlaceOnlyOrder
+			// Use the order ID from the previous run: 39125080937
 			let coin = "ETH"
-			let isBuy = true
-			let size = 0.01
-			let limitPx = 1000.0  // Very low price to ensure it stays resting
+			let existingOid: Int64 = 39125080937
 			
-			print("Placing new order with same account...")
-			let orderRes = try await exch.order(
-				coin: coin,
-				isBuy: isBuy,
-				sz: size,
-				limitPx: limitPx,
-				orderType: ["limit": ["tif": "Gtc"]]
-			)
-			print("Order placed:", orderRes)
+			print("Attempting to cancel existing order with oid:", existingOid)
+			print("Account address:", try exch.getAccountAddress())
 			
-			// Parse and cancel immediately
-			if let responseString = orderRes as? String,
-			   let responseData = responseString.data(using: .utf8),
-			   let orderData = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
-			   let response = orderData["response"] as? [String: Any],
-			   let data = response["data"] as? [String: Any],
-			   let statuses = data["statuses"] as? [[String: Any]],
-			   let firstStatus = statuses.first,
-			   let resting = firstStatus["resting"] as? [String: Any],
-			   let oid = resting["oid"] as? Int64 {
-				
-				print("✅ Order placed successfully! OID:", oid)
-				
-				// Debug: Try to recover address from actual order signature
-				if let responseString = orderRes as? String,
-				   let responseData = responseString.data(using: .utf8),
-				   let orderData = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] {
-					print("Order response data:", orderData)
-				}
-				
-				print("Waiting 1 second before canceling...")
-				try await Task.sleep(nanoseconds: 1_000_000_000)
-				
-				// Debug: Test cancel with a simple approach - try to cancel the same order
-				print("Canceling order with oid:", oid)
-				print("Account address before cancel:", try exch.getAccountAddress())
-				
-				// Debug: Test signature recovery from actual order signature
-				print("Testing signature recovery from actual order signature...")
-				// We need to get the actual signature from the order request
-				// For now, let's just test the cancel
-				
-				let cancelRes = try await exch.cancel(coin: coin, oid: oid)
-				print("Cancel result:", cancelRes)
-			} else {
-				print("Could not parse order response")
-			}
+			let cancelRes = try await exch.cancel(coin: coin, oid: existingOid)
+			print("Cancel result:", cancelRes)
 			
 		} catch {
 			print("Error:", error)
