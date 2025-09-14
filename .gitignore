@@ -1,0 +1,21 @@
+# Xcode
+.DS_Store
+xcuserdata/
+*.xcworkspace
+*.xcodeproj
+actionerror.md
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Generated files
+*.generated.swift
+
+# Test artifacts
+Tests/Resources/cassettes/
+
+# Config files with sensitive data
+Examples/config.json
+
+# Conventional commits template
+.gitmessage
