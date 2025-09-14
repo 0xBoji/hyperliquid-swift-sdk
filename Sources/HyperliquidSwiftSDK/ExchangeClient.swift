@@ -156,4 +156,67 @@ extension ExchangeClient {
     }
 }
 
+// MARK: - Order Management
+extension ExchangeClient {
+    /// Cancel an order by order ID
+    public func cancel(oid: Int) async throws -> Any {
+        let action = OrderedMap([
+            ("type", "cancel"),
+            ("cancels", [["oid": oid]]),
+        ])
+        
+        let nonce = Int(Date().timeIntervalSince1970 * 1000)
+        let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
+        
+        let body: [String: Any] = [
+            "action": [
+                "type": "cancel",
+                "cancels": [["oid": oid]]
+            ],
+            "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
+            "nonce": nonce,
+            "vaultAddress": NSNull(),
+            "expiresAfter": NSNull(),
+        ]
+        
+        // Debug: print payload JSON for verification
+        if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
+            print("[Exchange Debug] Cancel request body to /exchange:\n\(dbgStr)")
+        }
+        
+        let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+    
+    /// Cancel an order by client order ID (cloid)
+    public func cancelByCloid(cloid: String) async throws -> Any {
+        let action = OrderedMap([
+            ("type", "cancelByCloid"),
+            ("cancels", [["cloid": cloid]]),
+        ])
+        
+        let nonce = Int(Date().timeIntervalSince1970 * 1000)
+        let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
+        
+        let body: [String: Any] = [
+            "action": [
+                "type": "cancelByCloid",
+                "cancels": [["cloid": cloid]]
+            ],
+            "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
+            "nonce": nonce,
+            "vaultAddress": NSNull(),
+            "expiresAfter": NSNull(),
+        ]
+        
+        // Debug: print payload JSON for verification
+        if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
+            print("[Exchange Debug] CancelByCloid request body to /exchange:\n\(dbgStr)")
+        }
+        
+        let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+}
+
 

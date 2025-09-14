@@ -12,6 +12,7 @@ let package = Package(
         .executable(name: "BasicPlaceOrderSketch", targets: ["BasicPlaceOrderSketch"]),
         .executable(name: "BasicMarketOrder", targets: ["BasicMarketOrder"]),
         .executable(name: "BasicPlaceOnlyOrder", targets: ["BasicPlaceOnlyOrder"]),
+        .executable(name: "BasicOrderCancel", targets: ["BasicOrderCancel"]),
     ],
     dependencies: [
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift", from: "1.8.0"),
@@ -29,6 +30,7 @@ let package = Package(
         .executableTarget(name: "BasicPlaceOrderSketch", dependencies: [], path: "Examples/BasicPlaceOrderSketch"),
         .executableTarget(name: "BasicMarketOrder", dependencies: ["HyperliquidSwiftSDK"], path: "Examples/BasicMarketOrder"),
         .executableTarget(name: "BasicPlaceOnlyOrder", dependencies: ["HyperliquidSwiftSDK"], path: "Examples/BasicPlaceOnlyOrder"),
+        .executableTarget(name: "BasicOrderCancel", dependencies: ["HyperliquidSwiftSDK"], path: "Examples/BasicOrderCancel"),
     ]
 )
 
