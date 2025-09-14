@@ -14,6 +14,14 @@ public final class ExchangeClient {
         self.info = InfoClient(config: .init(baseURL: baseURL), transport: transport)
         self.isMainnet = baseURL.host?.contains("testnet") == false
     }
+    
+    public func getAccountAddress() throws -> String {
+        return try signer.getAddress()
+    }
+    
+    public var evmSigner: EvmSigner {
+        return signer
+    }
 
     // Market order via aggressive IOC limit at slippage around mid
     public func marketOpen(coin: String, isBuy: Bool, sz: Double, slippage: Double = 0.01) async throws -> Any {

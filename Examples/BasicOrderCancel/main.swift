@@ -20,13 +20,27 @@ struct BasicOrderCancel {
 		do {
 			let exch = try ExchangeClient(baseURL: base, privateKeyHex: sk)
 			
-			// Place a limit order without cloid first
+			// Debug: Check account address derivation
+			
+			// Get account address from the signer
+			let accountAddress = try exch.getAccountAddress()
+			print("Account address from private key:", accountAddress)
+			
+			// Test signature recovery to verify address consistency
+			let testMessage = "test message".data(using: .utf8)!
+			let testHash = keccak256(testMessage)
+			let testSignature = try exch.evmSigner.signTypedData(testHash)
+			let recoveredAddress = try exch.evmSigner.getAddressFromSignature(testSignature, messageHash: testHash)
+			print("Recovered address from signature:", recoveredAddress)
+			print("Addresses match:", accountAddress == recoveredAddress)
+			
+			// Place a new order to test with same account
 			let coin = "ETH"
 			let isBuy = true
 			let size = 0.01
-			let limitPx = 4400.0
+			let limitPx = 1000.0  // Very low price to ensure it stays resting
 			
-			print("Placing order without cloid")
+			print("Placing new order with same account...")
 			let orderRes = try await exch.order(
 				coin: coin,
 				isBuy: isBuy,
@@ -36,35 +50,32 @@ struct BasicOrderCancel {
 			)
 			print("Order placed:", orderRes)
 			
-			// Parse JSON string response
-			guard let responseString = orderRes as? String,
-				  let responseData = responseString.data(using: .utf8),
-				  let orderData = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] else {
-				print("Could not parse response as JSON")
-				return
-			}
-			
-			print("Response structure:", orderData)
-			
-			// Parse the order response
-			if let response = orderData["response"] as? [String: Any],
+			// Parse and cancel immediately
+			if let responseString = orderRes as? String,
+			   let responseData = responseString.data(using: .utf8),
+			   let orderData = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any],
+			   let response = orderData["response"] as? [String: Any],
 			   let data = response["data"] as? [String: Any],
 			   let statuses = data["statuses"] as? [[String: Any]],
-			   let firstStatus = statuses.first {
+			   let firstStatus = statuses.first,
+			   let resting = firstStatus["resting"] as? [String: Any],
+			   let oid = resting["oid"] as? Int {
 				
-				if let resting = firstStatus["resting"] as? [String: Any],
-				   let oid = resting["oid"] as? Int {
-					print("✅ Order placed successfully!")
-					print("Order ID:", oid)
-					print("Order is resting on the order book.")
-					print("To cancel this order, you would call: exch.cancel(coin: \"\(coin)\", oid: \(oid))")
-				} else if let error = firstStatus["error"] as? String {
-					print("❌ Order failed:", error)
-					print("This is expected if the account doesn't have sufficient margin or doesn't exist on testnet.")
-					print("The SDK is working correctly - this is a business logic error, not a technical error.")
-				} else {
-					print("❓ Unknown order status:", firstStatus)
+				print("✅ Order placed successfully! OID:", oid)
+				
+				// Debug: Try to recover address from actual order signature
+				if let responseString = orderRes as? String,
+				   let responseData = responseString.data(using: .utf8),
+				   let orderData = try? JSONSerialization.jsonObject(with: responseData) as? [String: Any] {
+					print("Order response data:", orderData)
 				}
+				
+				print("Waiting 1 second before canceling...")
+				try await Task.sleep(nanoseconds: 1_000_000_000)
+				
+				print("Canceling order with oid:", oid)
+				let cancelRes = try await exch.cancel(coin: coin, oid: oid)
+				print("Cancel result:", cancelRes)
 			} else {
 				print("Could not parse order response")
 			}

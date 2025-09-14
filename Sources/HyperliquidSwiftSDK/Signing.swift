@@ -34,6 +34,57 @@ public final class EvmSigner {
         let v: UInt8 = 27 + UInt8(recid)
         return .init(r: "0x" + r.toHexString(), s: "0x" + s.toHexString(), v: v)
     }
+    
+    public func getAddress() throws -> String {
+        // Derive public key from private key
+        var pubkey = secp256k1_pubkey()
+        let ok = privkey.withUnsafeBytes { keyPtr in
+            secp256k1_ec_pubkey_create(ctx, &pubkey, keyPtr.bindMemory(to: UInt8.self).baseAddress!) == 1
+        }
+        guard ok else { throw SigningError.signFailed }
+        
+        // Serialize public key (uncompressed)
+        var serialized = [UInt8](repeating: 0, count: 65)
+        var len = 65
+        secp256k1_ec_pubkey_serialize(ctx, &serialized, &len, &pubkey, UInt32(SECP256K1_EC_UNCOMPRESSED))
+        
+        // Take last 20 bytes (address) - this is the correct way
+        let addressBytes = Data(serialized[45..<65])
+        return "0x" + addressBytes.toHexString()
+    }
+    
+    public func getAddressFromSignature(_ signature: EcdsaSignature, messageHash: Data) throws -> String {
+        // Recover public key from signature
+        var sig = secp256k1_ecdsa_recoverable_signature()
+        let r = Data(hex: signature.r.hasPrefix("0x") ? String(signature.r.dropFirst(2)) : signature.r)!
+        let s = Data(hex: signature.s.hasPrefix("0x") ? String(signature.s.dropFirst(2)) : signature.s)!
+        let recid = Int32(signature.v - 27)
+        
+        var compact = Data()
+        compact.append(r)
+        compact.append(s)
+        
+        let ok = compact.withUnsafeBytes { sigPtr in
+            secp256k1_ecdsa_recoverable_signature_parse_compact(ctx, &sig, sigPtr.bindMemory(to: UInt8.self).baseAddress!, recid) == 1
+        }
+        guard ok else { throw SigningError.signFailed }
+        
+        // Recover public key
+        var pubkey = secp256k1_pubkey()
+        let recoverOk = messageHash.withUnsafeBytes { msgPtr in
+            secp256k1_ecdsa_recover(ctx, &pubkey, &sig, msgPtr.bindMemory(to: UInt8.self).baseAddress!) == 1
+        }
+        guard recoverOk else { throw SigningError.signFailed }
+        
+        // Serialize public key (uncompressed)
+        var serialized = [UInt8](repeating: 0, count: 65)
+        var len = 65
+        secp256k1_ec_pubkey_serialize(ctx, &serialized, &len, &pubkey, UInt32(SECP256K1_EC_UNCOMPRESSED))
+        
+        // Take last 20 bytes (address)
+        let addressBytes = Data(serialized[45..<65])
+        return "0x" + addressBytes.toHexString()
+    }
 }
 
 // MARK: - Hashing helpers
