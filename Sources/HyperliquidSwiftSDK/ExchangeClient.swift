@@ -43,7 +43,7 @@ public final class ExchangeClient {
         let nonce = Int(Date().timeIntervalSince1970 * 1000)
         let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
 
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "action": [
                 "type": "order",
                 "orders": [
@@ -53,9 +53,8 @@ public final class ExchangeClient {
             ],
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
-            "vaultAddress": NSNull(),
-            "expiresAfter": NSNull(),
         ]
+        // Don't include vaultAddress and expiresAfter for order actions (like Python SDK)
 
         // Debug: print payload JSON for verification
         if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
@@ -159,10 +158,16 @@ extension ExchangeClient {
 // MARK: - Order Management
 extension ExchangeClient {
     /// Cancel an order by order ID
-    public func cancel(oid: Int) async throws -> Any {
+    public func cancel(coin: String, oid: Int) async throws -> Any {
+        // Get asset ID for the coin
+        let meta = try await info.meta()
+        guard let asset = meta.universe.firstIndex(where: { $0.name == coin }) else { 
+            throw NSError(domain: "asset", code: -1) 
+        }
+        
         let action = OrderedMap([
             ("type", "cancel"),
-            ("cancels", [["oid": oid]]),
+            ("cancels", [["a": asset, "o": oid]]),
         ])
         
         let nonce = Int(Date().timeIntervalSince1970 * 1000)
@@ -171,12 +176,10 @@ extension ExchangeClient {
         let body: [String: Any] = [
             "action": [
                 "type": "cancel",
-                "cancels": [["oid": oid]]
+                "cancels": [["a": asset, "o": oid]]
             ],
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
-            "vaultAddress": NSNull(),
-            "expiresAfter": NSNull(),
         ]
         
         // Debug: print payload JSON for verification
@@ -205,8 +208,6 @@ extension ExchangeClient {
             ],
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
-            "vaultAddress": NSNull(),
-            "expiresAfter": NSNull(),
         ]
         
         // Debug: print payload JSON for verification
