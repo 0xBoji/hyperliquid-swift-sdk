@@ -166,7 +166,7 @@ extension ExchangeClient {
 // MARK: - Order Management
 extension ExchangeClient {
     /// Cancel an order by order ID (backward compatibility - requires coin parameter)
-    public func cancel(coin: String, oid: Int) async throws -> Any {
+    public func cancel(coin: String, oid: Int64) async throws -> Any {
         // Get asset ID for the coin
         let meta = try await info.meta()
         guard let asset = meta.universe.firstIndex(where: { $0.name == coin }) else { 

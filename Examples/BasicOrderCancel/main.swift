@@ -59,7 +59,7 @@ struct BasicOrderCancel {
 			   let statuses = data["statuses"] as? [[String: Any]],
 			   let firstStatus = statuses.first,
 			   let resting = firstStatus["resting"] as? [String: Any],
-			   let oid = resting["oid"] as? Int {
+			   let oid = resting["oid"] as? Int64 {
 				
 				print("✅ Order placed successfully! OID:", oid)
 				
