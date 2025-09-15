@@ -59,6 +59,101 @@ public final class InfoClient {
         struct Body: Encodable { let type = "allMids"; let dex: String? }
         return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(dex: dex), timeout: config.timeout)
     }
+
+    public func userFills(user: String) async throws -> [UserFill] {
+        struct Body: Encodable { let type = "userFills"; let user: String }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user), timeout: config.timeout)
+    }
+
+    public func openOrders(user: String) async throws -> [OpenOrder] {
+        struct Body: Encodable { let type = "openOrders"; let user: String }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user), timeout: config.timeout)
+    }
+
+    public func fundingHistory(coin: String, startTime: Int64, endTime: Int64? = nil) async throws -> [FundingHistory] {
+        struct Body: Encodable {
+            let type = "fundingHistory"
+            let coin: String
+            let startTime: Int64
+            let endTime: Int64?
+        }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(coin: coin, startTime: startTime, endTime: endTime), timeout: config.timeout)
+    }
+
+    public func l2Snapshot(coin: String) async throws -> L2Book {
+        struct Body: Encodable { let type = "l2Book"; let coin: String }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(coin: coin), timeout: config.timeout)
+    }
+
+    public func candlesSnapshot(coin: String, interval: String, startTime: Int64, endTime: Int64) async throws -> [Candle] {
+        struct Req: Encodable {
+            let coin: String
+            let interval: String
+            let startTime: Int64
+            let endTime: Int64
+        }
+        struct Body: Encodable {
+            let type = "candleSnapshot"
+            let req: Req
+        }
+        let req = Req(coin: coin, interval: interval, startTime: startTime, endTime: endTime)
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(req: req), timeout: config.timeout)
+    }
+
+    public func userFundingHistory(user: String, startTime: Int64, endTime: Int64? = nil) async throws -> [UserFunding] {
+        struct Body: Encodable {
+            let type = "userFunding"
+            let user: String
+            let startTime: Int64
+            let endTime: Int64?
+        }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user, startTime: startTime, endTime: endTime), timeout: config.timeout)
+    }
+
+    public func metaAndAssetCtxs() async throws -> MetaAndAssetCtxs {
+        struct Body: Encodable { let type = "metaAndAssetCtxs" }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(), timeout: config.timeout)
+    }
+
+    public func orderStatus(user: String, oid: Int64) async throws -> OrderStatus {
+        struct Body: Encodable {
+            let type = "orderStatus"
+            let user: String
+            let oid: Int64
+        }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user, oid: oid), timeout: config.timeout)
+    }
+
+    public func userFillsByTime(user: String, startTime: Int64, endTime: Int64? = nil) async throws -> [UserFill] {
+        struct Body: Encodable {
+            let type = "userFillsByTime"
+            let user: String
+            let startTime: Int64
+            let endTime: Int64?
+        }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user, startTime: startTime, endTime: endTime), timeout: config.timeout)
+    }
+
+    public func historicalOrders(user: String) async throws -> [HistoricalOrder] {
+        struct Body: Encodable { let type = "historicalOrders"; let user: String }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user), timeout: config.timeout)
+    }
+
+    public func frontendOpenOrders(user: String) async throws -> [FrontendOpenOrder] {
+        struct Body: Encodable { let type = "frontendOpenOrders"; let user: String }
+        return try await transport.post(baseURL: config.baseURL, path: "/info", body: Body(user: user), timeout: config.timeout)
+    }
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

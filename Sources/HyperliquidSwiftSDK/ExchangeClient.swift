@@ -14,11 +14,11 @@ public final class ExchangeClient {
         self.info = InfoClient(config: .init(baseURL: baseURL), transport: transport)
         self.isMainnet = baseURL.host?.contains("testnet") == false
     }
-    
+
     public func getAccountAddress() throws -> String {
         return try signer.getAddress()
     }
-    
+
     public var evmSigner: EvmSigner {
         return signer
     }
@@ -169,18 +169,18 @@ extension ExchangeClient {
     public func cancel(coin: String, oid: Int64) async throws -> Any {
         // Get asset ID for the coin
         let meta = try await info.meta()
-        guard let asset = meta.universe.firstIndex(where: { $0.name == coin }) else { 
-            throw NSError(domain: "asset", code: -1) 
+        guard let asset = meta.universe.firstIndex(where: { $0.name == coin }) else {
+            throw NSError(domain: "asset", code: -1)
         }
-        
+
         let action = OrderedMap([
             ("type", "cancel"),
             ("cancels", [["a": asset, "o": oid]]),
         ])
-        
+
         let nonce = Int(Date().timeIntervalSince1970 * 1000)
         let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
-        
+
         var body: [String: Any] = [
             "action": [
                 "type": "cancel",
@@ -189,29 +189,29 @@ extension ExchangeClient {
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
         ]
-        
+
         // Only add vaultAddress and expiresAfter if they are not nil (match Python SDK behavior)
         // For cancel actions, vaultAddress and expiresAfter are always nil, so we don't add them
-        
+
         // Debug: print payload JSON for verification
         if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
             print("[Exchange Debug] Cancel request body to /exchange:\n\(dbgStr)")
         }
-        
+
         let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
         return String(data: data, encoding: .utf8) ?? ""
     }
-    
+
     /// Cancel an order by client order ID (cloid)
     public func cancelByCloid(cloid: String) async throws -> Any {
         let action = OrderedMap([
             ("type", "cancelByCloid"),
             ("cancels", [["cloid": cloid]]),
         ])
-        
+
         let nonce = Int(Date().timeIntervalSince1970 * 1000)
         let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
-        
+
         var body: [String: Any] = [
             "action": [
                 "type": "cancelByCloid",
@@ -220,18 +220,119 @@ extension ExchangeClient {
             "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
             "nonce": nonce,
         ]
-        
+
         // Only add vaultAddress and expiresAfter if they are not nil (match Python SDK behavior)
         // For cancel actions, vaultAddress and expiresAfter are always nil, so we don't add them
-        
+
         // Debug: print payload JSON for verification
         if let dbg = try? JSONSerialization.data(withJSONObject: body, options: [.prettyPrinted]), let dbgStr = String(data: dbg, encoding: .utf8) {
             print("[Exchange Debug] CancelByCloid request body to /exchange:\n\(dbgStr)")
         }
-        
+
         let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
         return String(data: data, encoding: .utf8) ?? ""
     }
+
+    /// Schedules a time (in UTC millis) to cancel all open orders.
+    public func scheduleCancel(time: Int64?) async throws -> Any {
+        var actionPairs: [(String, Any)] = [("type", "scheduleCancel")]
+        if let t = time {
+            actionPairs.append(("time", t))
+        }
+        let action = OrderedMap(actionPairs)
+
+        let nonce = Int(Date().timeIntervalSince1970 * 1000)
+        let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
+
+        var actionBody: [String: Any] = ["type": "scheduleCancel"]
+        if let t = time {
+            actionBody["time"] = t
+        }
+
+        let body: [String: Any] = [
+            "action": actionBody,
+            "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
+            "nonce": nonce,
+        ]
+
+        let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
 }
+
+// MARK: - Position Management
+extension ExchangeClient {
+    /// Update leverage for a position
+    public func updateLeverage(coin: String, isCross: Bool, leverage: Int) async throws -> Any {
+        let meta = try await info.meta()
+        guard let asset = meta.universe.firstIndex(where: { $0.name == coin }) else {
+            throw NSError(domain: "asset", code: -1)
+        }
+
+        let action = OrderedMap([
+            ("type", "updateLeverage"),
+            ("asset", asset),
+            ("isCross", isCross),
+            ("leverage", leverage),
+        ])
+
+        let nonce = Int(Date().timeIntervalSince1970 * 1000)
+        let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
+
+        let body: [String: Any] = [
+            "action": [
+                "type": "updateLeverage",
+                "asset": asset,
+                "isCross": isCross,
+                "leverage": leverage,
+            ],
+            "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
+            "nonce": nonce,
+        ]
+
+        let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
+    /// Update isolated margin for a position
+    public func updateIsolatedMargin(coin: String, amount: Double) async throws -> Any {
+        let meta = try await info.meta()
+        guard let asset = meta.universe.firstIndex(where: { $0.name == coin }) else {
+            throw NSError(domain: "asset", code: -1)
+        }
+
+        let amountInt = Int(amount * 1_000_000)
+
+        let action = OrderedMap([
+            ("type", "updateIsolatedMargin"),
+            ("asset", asset),
+            ("isBuy", true),
+            ("ntli", amountInt),
+        ])
+
+        let nonce = Int(Date().timeIntervalSince1970 * 1000)
+        let payload = try signL1(orderedAction: action, vaultAddress: nil, nonce: nonce, expiresAfter: nil)
+
+        let body: [String: Any] = [
+            "action": [
+                "type": "updateIsolatedMargin",
+                "asset": asset,
+                "isBuy": true,
+                "ntli": amountInt,
+            ],
+            "signature": ["r": payload.r, "s": payload.s, "v": payload.v],
+            "nonce": nonce,
+        ]
+
+        let data = try await (transport as! URLSessionTransport).postJSON(baseURL: baseURL, path: "/exchange", jsonBody: body, timeout: nil)
+        return String(data: data, encoding: .utf8) ?? ""
+    }
+
+}
+
+
+
+
 
 

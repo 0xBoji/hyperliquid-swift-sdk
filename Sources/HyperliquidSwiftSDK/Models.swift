@@ -81,6 +81,164 @@ public struct SpotUserState: Codable {
     public let balances: [SpotUserBalance]
 }
 
+public struct UserFill: Codable {
+    public let closedPnl: String
+    public let coin: String
+    public let crossed: Bool
+    public let dir: String
+    public let hash: String
+    public let oid: Int64
+    public let px: String
+    public let side: String
+    public let startPosition: String
+    public let sz: String
+    public let time: Int64
+}
+
+public struct OpenOrder: Codable {
+    public let coin: String
+    public let limitPx: String
+    public let oid: Int64
+    public let side: String
+    public let sz: String
+    public let timestamp: Int64
+}
+
+public struct FundingHistory: Codable {
+    public let coin: String
+    public let fundingRate: String
+    public let premium: String
+    public let time: Int64
+}
+
+public struct L2BookLevel: Codable {
+    public let n: Int
+    public let px: String
+    public let sz: String
+}
+
+public struct L2Book: Codable {
+    public let coin: String
+    public let levels: [[L2BookLevel]]
+    public let time: Int64
+}
+
+public struct Candle: Codable {
+    public let T: Int64
+    public let c: String
+    public let h: String
+    public let i: String
+    public let l: String
+    public let n: Int
+    public let o: String
+    public let s: String
+    public let t: Int64
+    public let v: String
+}
+
+public struct UserFunding: Codable {
+    public let time: Int64
+    public let coin: String
+    public let usdc: String
+    public let szi: String
+    public let fundingRate: String
+}
+
+public struct AssetCtx: Codable {
+    public let dayNtlVlm: String
+    public let funding: String
+    public let impactPxs: [String]?
+    public let markPx: String
+    public let midPx: String?
+    public let openInterest: String
+    public let oraclePx: String
+    public let premium: String?
+    public let prevDayPx: String
+}
+
+public struct MetaAndAssetCtxs: Codable {
+    public let meta: Meta
+    public let assetCtxs: [AssetCtx]
+
+    public init(from decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        self.meta = try container.decode(Meta.self)
+        self.assetCtxs = try container.decode([AssetCtx].self)
+    }
+}
+
+public struct OrderType: Codable {
+    public struct Limit: Codable {
+        public let tif: String
+    }
+    public struct Trigger: Codable {
+        public let triggerPx: String
+        public let tpsl: String
+    }
+
+    public let limit: Limit?
+    public let trigger: Trigger?
+}
+
+public struct Order: Codable {
+    public let asset: Int
+    public let isBuy: Bool
+    public let reduceOnly: Bool
+    public let limitPx: String
+    public let sz: String
+    public let orderType: OrderType
+}
+
+public struct OrderInfo: Codable {
+    public let order: Order
+    public let oid: Int64
+    public let status: String
+    public let timestamp: Int64
+}
+
+public struct OrderStatus: Codable {
+    public let order: OrderInfo?
+    public let status: String
+}
+
+public struct HistoricalOrder: Codable {
+    public let coin: String
+    public let side: String
+    public let limitPx: String
+    public let sz: String
+    public let oid: Int64
+    public let status: String
+    public let timestamp: Int64
+}
+
+public struct FrontendOpenOrder: Codable {
+    public let coin: String
+    public let isPositionTpsl: Bool
+    public let isTrigger: Bool
+    public let limitPx: String
+    public let oid: Int64
+    public let orderType: String
+    public let origSz: String
+    public let reduceOnly: Bool
+    public let side: String
+    public let sz: String
+    public let tif: String?
+    public let timestamp: Int64
+    public let triggerCondition: String
+    public let triggerPx: String
+    public let children: [FrontendOpenOrder]?
+}
+
+
+
+
+
+
+
+
+
+
+
 // Helper for unknown nested arrays in marginTables
 public struct AnyCodable: Codable {
     public let value: Any
